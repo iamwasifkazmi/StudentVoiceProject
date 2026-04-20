@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -22,6 +23,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export function LoginScreen({ navigation }: Props) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const insets = useSafeAreaInsets();
 
   return (
@@ -44,6 +46,8 @@ export function LoginScreen({ navigation }: Props) {
             label="Password"
             secureTextEntry
             placeholder="••••••••"
+            value={password}
+            onChangeText={setPassword}
             containerStyle={styles.fieldGap}
           />
           <Pressable
@@ -54,6 +58,13 @@ export function LoginScreen({ navigation }: Props) {
           <PrimaryButton
             label="Log In"
             onPress={() => {
+              if (!email.trim() || !password) {
+                Alert.alert(
+                  'Missing information',
+                  'Please enter your email and password.',
+                );
+                return;
+              }
               signIn();
               navigation.dispatch(
                 CommonActions.reset({

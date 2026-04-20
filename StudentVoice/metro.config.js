@@ -18,6 +18,7 @@ module.exports = mergeConfig(getDefaultConfig(projectRoot), {
   resolver: {
     extraNodeModules: {
       react: path.join(nm, 'react'),
+      'react-native': path.join(nm, 'react-native'),
     },
     resolveRequest: (context, moduleName, platform) => {
       const isReactCore =

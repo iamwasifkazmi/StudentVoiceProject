@@ -1,0 +1,112 @@
+diff --git a/node_modules/@react-navigation/elements/lib/module/useFrameSize.js b/node_modules/@react-navigation/elements/lib/module/useFrameSize.js
+index 6532256..cdb6d0d 100644
+--- a/node_modules/@react-navigation/elements/lib/module/useFrameSize.js
++++ b/node_modules/@react-navigation/elements/lib/module/useFrameSize.js
+@@ -1,18 +1,25 @@
+ "use strict";
+ 
+ import * as React from 'react';
+-import { Platform } from 'react-native';
+-import useLatestCallback from 'use-latest-callback';
+-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector';
++import { Platform, useWindowDimensions } from 'react-native';
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ const FrameContext = /*#__PURE__*/React.createContext(undefined);
++
++/**
++ * Patched for React Native + React 19:
++ * - useFrameSize uses useWindowDimensions (avoids FrameContext + useSyncExternalStore).
++ * - FrameSizeProvider uses only React.* hooks (no use-latest-callback) to avoid
++ *   "Invalid hook call" when Metro resolves hooks across packages.
++ */
+ export function useFrameSize(selector, throttle) {
+-  const context = React.useContext(FrameContext);
+-  if (context == null) {
+-    throw new Error('useFrameSize must be used within a FrameSizeProvider');
+-  }
+-  const value = useSyncExternalStoreWithSelector(throttle ? context.subscribeThrottled : context.subscribe, context.getCurrent, context.getCurrent, selector);
+-  return value;
++  const {
++    width,
++    height
++  } = useWindowDimensions();
++  return selector({
++    width,
++    height
++  });
+ }
+ export function FrameSizeProvider({
+   initialFrame,
+@@ -23,16 +30,15 @@ export function FrameSizeProvider({
+     height: initialFrame.height
+   });
+   const listeners = React.useRef(new Set());
+-  const getCurrent = useLatestCallback(() => frameRef.current);
+-  const subscribe = useLatestCallback(listener => {
++  const getCurrent = React.useCallback(() => frameRef.current, []);
++  const subscribe = React.useCallback(listener => {
+     listeners.current.add(listener);
+     return () => {
+       listeners.current.delete(listener);
+     };
+-  });
+-  const subscribeThrottled = useLatestCallback(listener => {
+-    const delay = 100; // Throttle delay in milliseconds
+-
++  }, []);
++  const subscribeThrottled = React.useCallback(listener => {
++    const delay = 100;
+     let timer;
+     let updated = false;
+     let waiting = false;
+@@ -40,7 +46,6 @@ export function FrameSizeProvider({
+       clearTimeout(timer);
+       updated = true;
+       if (waiting) {
+-        // Schedule a timer to call the listener at the end
+         timer = setTimeout(() => {
+           if (updated) {
+             updated = false;
+@@ -52,8 +57,6 @@ export function FrameSizeProvider({
+         setTimeout(function () {
+           waiting = false;
+         }, delay);
+-
+-        // Call the listener immediately at start
+         updated = false;
+         listener();
+       }
+@@ -63,13 +66,8 @@ export function FrameSizeProvider({
+       unsubscribe();
+       clearTimeout(timer);
+     };
+-  });
+-  const context = React.useMemo(() => ({
+-    getCurrent,
+-    subscribe,
+-    subscribeThrottled
+-  }), [subscribe, subscribeThrottled, getCurrent]);
+-  const onChange = useLatestCallback(frame => {
++  }, [subscribe]);
++  const onChange = React.useCallback(frame => {
+     if (frameRef.current.height === frame.height && frameRef.current.width === frame.width) {
+       return;
+     }
+@@ -78,11 +76,15 @@ export function FrameSizeProvider({
+       height: frame.height
+     };
+     listeners.current.forEach(listener => listener());
+-  });
++  }, []);
++  const context = React.useMemo(() => ({
++    getCurrent,
++    subscribe,
++    subscribeThrottled
++  }), [subscribe, subscribeThrottled, getCurrent]);
+   const viewRef = React.useRef(null);
+   React.useEffect(() => {
+     if (Platform.OS === 'web') {
+-      // We use ResizeObserver on web
+       return;
+     }
+     viewRef.current?.measure((_x, _y, width, height) => {
