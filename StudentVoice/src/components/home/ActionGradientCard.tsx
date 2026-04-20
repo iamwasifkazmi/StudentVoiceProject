@@ -18,17 +18,26 @@ export function ActionGradientCard({
   onPress,
 }: Props) {
   return (
-    <Pressable onPress={onPress} style={styles.shadow}>
+    <Pressable onPress={onPress} style={styles.pressable}>
       <LinearGradient
         colors={colorsGrad}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.card}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.sub}>{subtitle}</Text>
-        <View style={styles.footer}>
-          <View style={styles.miniBtn}>
-            <Ionicons name="chevron-forward" size={18} color={colors.primaryRed} />
+        <View style={styles.inner}>
+          <View style={styles.copy}>
+            <Text style={styles.title} numberOfLines={3}>
+              {title}
+            </Text>
+            <Text style={styles.sub} numberOfLines={3}>
+              {subtitle}
+            </Text>
+          </View>
+          <View style={styles.spacer} />
+          <View style={styles.footer}>
+            <View style={styles.miniBtn}>
+              <Ionicons name="chevron-forward" size={18} color={colors.primaryRed} />
+            </View>
           </View>
         </View>
       </LinearGradient>
@@ -37,17 +46,32 @@ export function ActionGradientCard({
 }
 
 const styles = StyleSheet.create({
-  shadow: {
+  pressable: {
     flex: 1,
+    minWidth: 0,
     borderRadius: radii.xl,
-    minHeight: 120,
+    minHeight: 128,
   },
   card: {
     flex: 1,
     borderRadius: radii.xl,
-    padding: 14,
-    justifyContent: 'space-between',
     overflow: 'hidden',
+  },
+  inner: {
+    flex: 1,
+    flexDirection: 'column',
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 12,
+    minHeight: 128,
+  },
+  copy: {
+    flexShrink: 1,
+  },
+  spacer: {
+    flexGrow: 1,
+    flexShrink: 0,
+    minHeight: 8,
   },
   title: {
     ...typography.subtitle,
@@ -62,7 +86,9 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginTop: 12,
+    alignItems: 'center',
+    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   miniBtn: {
     width: 36,

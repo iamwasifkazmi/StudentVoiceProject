@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 12,
+    alignItems: 'stretch',
     marginBottom: 24,
   },
   sectionHead: {
