@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum FeedbackStatus {
+  submitted
+  received
+  acted_on
+}
+
+enum NotificationType {
+  feedback_received
+  action_taken
+  reminder
+}
+
+model User {
+  id                 String         @id @default(uuid()) @db.Uuid
+  fullName           String         @map("full_name")
+  email              String         @unique
+  studentId          String         @unique @map("student_id")
+  passwordHash       String         @map("password_hash")
+  notificationPrefs  Json           @default("{}") @map("notification_prefs")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  feedback           Feedback[]
+  notifications      Notification[]
+  refreshTokens      RefreshToken[]
+
+  @@map("users")
+}
+
+model Module {
+  id           String         @id @default(uuid()) @db.Uuid
+  code         String         @unique
+  name         String
+  lecturerName String         @map("lecturer_name")
+  colourHex    String         @map("colour_hex")
+  department   String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+  feedback     Feedback[]
+  impactEntries ImpactEntry[]
+
+  @@map("modules")
+}
+
+model Feedback {
+  id        String          @id @default(uuid()) @db.Uuid
+  userId    String          @map("user_id") @db.Uuid
+  moduleId  String          @map("module_id") @db.Uuid
+  rating    Int
+  comment   String?
+  status    FeedbackStatus  @default(submitted)
+  isDeleted Boolean         @default(false) @map("is_deleted")
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module    Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([moduleId])
+  @@index([status])
+  @@map("feedback")
+}
+
+model ImpactEntry {
+  id           String   @id @default(uuid()) @db.Uuid
+  moduleId     String   @map("module_id") @db.Uuid
+  youSaid      String   @map("you_said")
+  weDid        String   @map("we_did")
+  studentCount Int      @map("student_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  module       Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId])
+  @@map("impact_entries")
+}
+
+model Notification {
+  id          String             @id @default(uuid()) @db.Uuid
+  userId      String             @map("user_id") @db.Uuid
+  title       String
+  description String
+  type        NotificationType
+  isRead      Boolean            @default(false) @map("is_read")
+  referenceId String?            @map("reference_id") @db.Uuid
+  createdAt   DateTime           @default(now()) @map("created_at")
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}

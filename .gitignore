@@ -7,8 +7,9 @@
 .env.*
 !.env.example
 
-# Backend (Node when added)
-Backend/node_modules/
+# Backend
+backend/node_modules/
+backend/dist/
 
 # Logs
 *.log
