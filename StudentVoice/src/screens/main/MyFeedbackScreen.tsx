@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   searchPad: {
+    paddingTop: 16,
     paddingBottom: 12,
     backgroundColor: colors.background,
   },

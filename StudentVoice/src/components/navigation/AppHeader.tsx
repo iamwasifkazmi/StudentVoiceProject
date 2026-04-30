@@ -70,7 +70,10 @@ export function AppHeader({
           <Text style={[styles.redTitleLarge, typography.subtitle]}>{title}</Text>
         )}
         {subtitle ? (
-          <Text style={styles.subtitle}>{subtitle}</Text>
+          <Text
+            style={[styles.subtitle, onBackPress ? styles.subtitleWithBack : null]}>
+            {subtitle}
+          </Text>
         ) : null}
       </View>
     </View>
@@ -103,6 +106,9 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: 'rgba(255,255,255,0.9)',
     marginTop: 4,
+  },
+  /** Align with title text when a back chevron sits to the left of the title */
+  subtitleWithBack: {
     marginLeft: 28,
   },
   minimalWrap: {
