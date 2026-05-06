@@ -13,7 +13,13 @@ function mapFeedback(
     status: FeedbackStatus;
     createdAt: Date;
     updatedAt: Date;
-    module: { id: string; code: string; name: string; lecturerName: string };
+    module: {
+      id: string;
+      code: string;
+      name: string;
+      lecturerName: string;
+      colourHex: string;
+    };
   },
 ) {
   return {
@@ -22,6 +28,7 @@ function mapFeedback(
     moduleCode: f.module.code,
     moduleName: f.module.name,
     lecturerName: f.module.lecturerName,
+    moduleColour: f.module.colourHex,
     rating: f.rating,
     comment: f.comment,
     status: f.status,
@@ -67,8 +74,26 @@ export async function listFeedback(req: Request, res: Response) {
       prisma.feedback.count({ where }),
     ]);
 
+    const moduleIds = [...new Set(rows.map(r => r.moduleId))];
+    const previewByModule = new Map<string, string>();
+    if (moduleIds.length > 0) {
+      const impactRows = await prisma.impactEntry.findMany({
+        where: { moduleId: { in: moduleIds } },
+        orderBy: { createdAt: 'desc' },
+        select: { moduleId: true, weDid: true },
+      });
+      for (const row of impactRows) {
+        if (!previewByModule.has(row.moduleId)) {
+          previewByModule.set(row.moduleId, row.weDid);
+        }
+      }
+    }
+
     return ok(res, {
-      items: rows.map(mapFeedback),
+      items: rows.map(r => ({
+        ...mapFeedback(r),
+        weDidPreview: previewByModule.get(r.moduleId) ?? null,
+      })),
       pagination: { page: Number(page) || 1, limit: take, total },
     });
   } catch (e) {

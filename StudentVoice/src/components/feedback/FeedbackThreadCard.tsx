@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, radii, typography } from '../../theme';
-import type { FeedbackListItem } from '../../data/mockData';
+import type { FeedbackListItem } from '../../types/models';
 
 const toneMap = {
   green: { bg: colors.successMuted, fg: '#047857' },

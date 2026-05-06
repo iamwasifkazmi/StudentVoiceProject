@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
 import { ProgressSteps } from '../../components/submit/ProgressSteps';
 import { useSubmitFeedback } from '../../context/SubmitFeedbackContext';
+import { api } from '../../services/api';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { MainTabParamList, SubmitStackParamList } from '../../navigation/types';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -23,6 +24,7 @@ const TAB_BAR_SPACE = 100;
 export function ReviewSubmitScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { draft } = useSubmitFeedback();
+  const [saving, setSaving] = useState(false);
 
   const title = draft.module
     ? `${draft.module.code} – ${draft.module.name}`
@@ -70,7 +72,31 @@ export function ReviewSubmitScreen({ navigation }: Props) {
         </View>
         <PrimaryButton
           label="Submit Feedback"
-          onPress={() => navigation.navigate('Confirmation')}
+          loading={saving}
+          onPress={async () => {
+            if (!draft.module) {
+              Alert.alert('Module required', 'Please select a module first.');
+              return;
+            }
+            if (draft.rating < 1) {
+              Alert.alert('Rating required', 'Please choose a star rating.');
+              return;
+            }
+            try {
+              setSaving(true);
+              const fb = await api.submitFeedback({
+                moduleId: draft.module.id,
+                rating: draft.rating,
+                comment: draft.comment?.trim() || null,
+              });
+              navigation.navigate('Confirmation', { feedbackId: fb.id });
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : 'Submit failed';
+              Alert.alert('Could not submit', msg);
+            } finally {
+              setSaving(false);
+            }
+          }}
           style={styles.btn}
         />
       </ScreenScrollView>

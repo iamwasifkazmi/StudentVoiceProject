@@ -1,11 +1,14 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
-import { MOCK_IMPACT } from '../../data/mockData';
+import { SearchBar } from '../../components/ui/SearchBar';
+import { api } from '../../services/api';
+import type { ImpactEntry } from '../../types/models';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { HomeStackParamList, MainTabParamList } from '../../navigation/types';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -19,28 +22,78 @@ const TAB_BAR_SPACE = 100;
 
 export function SeeImpactScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const [q, setQ] = useState('');
+  const [rows, setRows] = useState<ImpactEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await api.listImpact();
+      setRows(
+        data.map(r => ({
+          id: r.id,
+          youSaid: r.youSaid,
+          weDid: r.weDid,
+          students: r.studentCount,
+          moduleCode: r.module.code,
+        })),
+      );
+    } catch {
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
+
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    if (!s) {
+      return rows;
+    }
+    return rows.filter(
+      e =>
+        e.youSaid.toLowerCase().includes(s) ||
+        e.weDid.toLowerCase().includes(s) ||
+        (e.moduleCode?.toLowerCase().includes(s) ?? false),
+    );
+  }, [rows, q]);
 
   return (
     <View style={styles.flex}>
-      <AppHeader
-        title="See Impact"
-        onBackPress={() => navigation.goBack()}
-      />
+      <AppHeader title="See Impact" onBackPress={() => navigation.goBack()} />
+      <View style={[styles.searchPad, { paddingHorizontal: horizontalPadding }]}>
+        <SearchBar value={q} onChangeText={setQ} placeholder="Search impact..." />
+      </View>
+      {loading ? (
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color={colors.primaryRed} />
+        </View>
+      ) : null}
       <ScreenScrollView
         padded={false}
         contentContainerStyle={{
           paddingHorizontal: horizontalPadding,
-          paddingTop: 16,
+          paddingTop: 8,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
         }}>
         <Text style={styles.intro}>
           Closing the loop — see how your feedback drove change across modules.
         </Text>
-        {MOCK_IMPACT.map(entry => (
+        {filtered.map(entry => (
           <View key={entry.id} style={styles.card}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{entry.students} students</Text>
             </View>
+            {entry.moduleCode ? (
+              <Text style={styles.moduleTag}>{entry.moduleCode}</Text>
+            ) : null}
             <Text style={styles.label}>You said</Text>
             <Text style={styles.quote}>&ldquo;{entry.youSaid}&rdquo;</Text>
             <Text style={[styles.label, styles.mt]}>We did</Text>
@@ -56,6 +109,14 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  searchPad: {
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: colors.background,
+  },
+  loader: {
+    paddingVertical: 12,
   },
   intro: {
     ...typography.caption,
@@ -85,6 +146,12 @@ const styles = StyleSheet.create({
     ...typography.small,
     color: '#C2410C',
     fontWeight: '600',
+  },
+  moduleTag: {
+    ...typography.small,
+    color: colors.primaryRed,
+    fontWeight: '700',
+    marginBottom: 6,
   },
   label: {
     ...typography.caption,

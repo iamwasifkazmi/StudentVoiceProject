@@ -1,5 +1,5 @@
 /**
- * Student Voice — static UI wired to match Figma (Resources/figma-screens).
+ * Student Voice — UI wired to Express API (see `src/constants/config.ts` for base URL).
  */
 import React from 'react';
 import { StatusBar, StyleSheet } from 'react-native';

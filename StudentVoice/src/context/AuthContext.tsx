@@ -1,32 +1,156 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { api, type AuthUser } from '../services/api';
+import { authBridge } from '../services/authBridge';
+import { setAuthHeader } from '../services/http';
+import * as storage from '../services/storage';
 
 type AuthContextValue = {
+  isReady: boolean;
   isLoggedIn: boolean;
+  user: AuthUser | null;
   userName: string;
-  signIn: (name?: string) => void;
-  signOut: () => void;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
+  registerAccount: (input: {
+    fullName: string;
+    email: string;
+    studentId: string;
+    password: string;
+  }) => Promise<void>;
+  signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('Student');
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-  const signIn = useCallback((name?: string) => {
-    if (name) {
-      setUserName(name);
-    }
+  const applySession = useCallback(async (access: string, refresh: string) => {
+    await storage.saveTokens(access, refresh);
+    setAuthHeader(access);
+    const profile = await api.getProfile();
+    setUser(profile);
     setIsLoggedIn(true);
   }, []);
 
-  const signOut = useCallback(() => {
+  const clearLocal = useCallback(async () => {
+    await storage.clearTokens();
+    setAuthHeader(null);
+    setUser(null);
     setIsLoggedIn(false);
   }, []);
 
+  useEffect(() => {
+    authBridge.current = {
+      clearSession: () => {
+        void clearLocal();
+      },
+    };
+    return () => {
+      authBridge.current = null;
+    };
+  }, [clearLocal]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const access = await storage.getAccessToken();
+        if (access) {
+          setAuthHeader(access);
+          const profile = await api.getProfile();
+          if (!cancelled) {
+            setUser(profile);
+            setIsLoggedIn(true);
+          }
+        }
+      } catch {
+        await clearLocal();
+      } finally {
+        if (!cancelled) {
+          setIsReady(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearLocal]);
+
+  const signInWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const res = await api.login(email.trim(), password);
+      await applySession(res.accessToken, res.refreshToken);
+    },
+    [applySession],
+  );
+
+  const registerAccount = useCallback(
+    async (input: {
+      fullName: string;
+      email: string;
+      studentId: string;
+      password: string;
+    }) => {
+      const res = await api.register({
+        fullName: input.fullName.trim(),
+        email: input.email.trim(),
+        studentId: input.studentId.trim(),
+        password: input.password,
+      });
+      await applySession(res.accessToken, res.refreshToken);
+    },
+    [applySession],
+  );
+
+  const signOut = useCallback(async () => {
+    await clearLocal();
+  }, [clearLocal]);
+
+  const refreshProfile = useCallback(async () => {
+    if (!isLoggedIn) {
+      return;
+    }
+    try {
+      const profile = await api.getProfile();
+      setUser(profile);
+    } catch {
+      /* keep last known user */
+    }
+  }, [isLoggedIn]);
+
+  const userName = user?.fullName ?? 'Student';
+
   const value = useMemo(
-    () => ({ isLoggedIn, userName, signIn, signOut }),
-    [isLoggedIn, userName, signIn, signOut],
+    () => ({
+      isReady,
+      isLoggedIn,
+      user,
+      userName,
+      signInWithPassword,
+      registerAccount,
+      signOut,
+      refreshProfile,
+    }),
+    [
+      isReady,
+      isLoggedIn,
+      user,
+      userName,
+      signInWithPassword,
+      registerAccount,
+      signOut,
+      refreshProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

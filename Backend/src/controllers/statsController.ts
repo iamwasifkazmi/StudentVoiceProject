@@ -22,7 +22,7 @@ export async function dashboard(req: Request, res: Response) {
         orderBy: { updatedAt: 'desc' },
         take: 10,
         include: {
-          module: { select: { code: true, name: true } },
+          module: { select: { code: true, name: true, colourHex: true } },
         },
       }),
     ]);
@@ -39,6 +39,7 @@ export async function dashboard(req: Request, res: Response) {
         id: r.id,
         moduleCode: r.module.code,
         moduleName: r.module.name,
+        moduleColour: r.module.colourHex,
         status: r.status,
         snippet: r.comment?.slice(0, 120) ?? '',
         updatedAt: r.updatedAt.toISOString(),

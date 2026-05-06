@@ -21,9 +21,10 @@ import type { RootStackParamList } from '../../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
-  const { signIn } = useAuth();
+  const { signInWithPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
 
   return (
@@ -57,7 +58,8 @@ export function LoginScreen({ navigation }: Props) {
           </Pressable>
           <PrimaryButton
             label="Log In"
-            onPress={() => {
+            loading={loading}
+            onPress={async () => {
               if (!email.trim() || !password) {
                 Alert.alert(
                   'Missing information',
@@ -65,13 +67,21 @@ export function LoginScreen({ navigation }: Props) {
                 );
                 return;
               }
-              signIn();
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: 'Main' }],
-                }),
-              );
+              try {
+                setLoading(true);
+                await signInWithPassword(email, password);
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Main' }],
+                  }),
+                );
+              } catch (e) {
+                const msg = e instanceof Error ? e.message : 'Login failed';
+                Alert.alert('Could not sign in', msg);
+              } finally {
+                setLoading(false);
+              }
             }}
             style={styles.loginBtn}
           />

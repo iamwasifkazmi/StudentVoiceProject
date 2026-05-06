@@ -1,12 +1,17 @@
-import React from 'react';
-import { CommonActions } from '@react-navigation/native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { CompositeScreenProps } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  CommonActions,
+  useRoute,
+  type CompositeScreenProps,
+  type RouteProp,
+} from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { useSubmitFeedback } from '../../context/SubmitFeedbackContext';
+import { api } from '../../services/api';
 import { colors, horizontalPadding, typography } from '../../theme';
 import type { MainTabParamList, SubmitStackParamList } from '../../navigation/types';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -16,11 +21,24 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList>
 >;
 
+const UNDO_SECONDS = 15;
+
 export function ConfirmationScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { reset } = useSubmitFeedback();
+  const route = useRoute<RouteProp<SubmitStackParamList, 'Confirmation'>>();
+  const feedbackId = route.params.feedbackId;
+  const [secondsLeft, setSecondsLeft] = useState(UNDO_SECONDS);
+  const [undoing, setUndoing] = useState(false);
 
-  const done = () => {
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSecondsLeft(s => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const finish = useCallback(() => {
     reset();
     navigation.dispatch(
       CommonActions.reset({
@@ -29,6 +47,24 @@ export function ConfirmationScreen({ navigation }: Props) {
       }),
     );
     navigation.getParent()?.getParent()?.navigate('Home');
+  }, [navigation, reset]);
+
+  const undo = async () => {
+    if (secondsLeft <= 0) {
+      return;
+    }
+    try {
+      setUndoing(true);
+      await api.deleteFeedback(feedbackId);
+      Alert.alert('Undone', 'Your feedback was withdrawn.', [
+        { text: 'OK', onPress: () => finish() },
+      ]);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not undo';
+      Alert.alert('Undo', msg, [{ text: 'OK', onPress: () => finish() }]);
+    } finally {
+      setUndoing(false);
+    }
   };
 
   return (
@@ -47,10 +83,29 @@ export function ConfirmationScreen({ navigation }: Props) {
           Your feedback has been submitted.{'\n'}
           We&apos;ll notify you when staff responds.
         </Text>
+        {secondsLeft > 0 ? (
+          <View style={styles.undoBar}>
+            <Text style={styles.undoText}>
+              Undo available · {secondsLeft}s
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Undo submission"
+              disabled={undoing}
+              onPress={() => void undo()}
+              style={({ pressed }) => [
+                styles.undoPress,
+                pressed && { opacity: 0.9 },
+                undoing && { opacity: 0.5 },
+              ]}>
+              <Text style={styles.undoPressText}>{undoing ? '…' : 'Undo'}</Text>
+            </Pressable>
+          </View>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Back to home"
-          onPress={done}
+          onPress={finish}
           style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </Pressable>
@@ -105,6 +160,30 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  undoBar: {
+    marginTop: 20,
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    gap: 10,
+  },
+  undoText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+  undoPress: {
+    borderWidth: 2,
+    borderColor: colors.primaryRed,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    minWidth: 160,
+    alignItems: 'center',
+  },
+  undoPressText: {
+    ...typography.bodyBold,
+    color: colors.primaryRed,
   },
   backBtn: {
     marginTop: 28,

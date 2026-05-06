@@ -17,14 +17,14 @@ export type HomeStackParamList = {
 
 export type MyFeedbackStackParamList = {
   MyFeedbackMain: undefined;
-  FeedbackDetail: { feedbackId?: string };
+  FeedbackDetail: { feedbackId: string };
 };
 
 export type SubmitStackParamList = {
   SelectModule: undefined;
   RateComment: undefined;
   ReviewSubmit: undefined;
-  Confirmation: undefined;
+  Confirmation: { feedbackId: string };
 };
 
 export type MainTabParamList = {

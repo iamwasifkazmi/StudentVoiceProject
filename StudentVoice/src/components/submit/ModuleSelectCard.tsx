@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import type { ModuleItem } from '../../data/mockData';
+import type { ModuleItem } from '../../types/models';
 import { colors, radii, typography } from '../../theme';
 
 type Props = {

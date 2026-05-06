@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CommonActions } from '@react-navigation/native';
 import {
   Pressable,
@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { MainTabParamList } from '../../navigation/types';
 
@@ -22,12 +23,30 @@ const TAB_BAR_SPACE = 100;
 
 export function SettingsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { signOut } = useAuth();
+  const { signOut, user, refreshProfile } = useAuth();
   const [pushOn, setPushOn] = useState(true);
   const [anon, setAnon] = useState(false);
 
-  const logout = () => {
-    signOut();
+  useEffect(() => {
+    const prefs = user?.notificationPrefs as Record<string, boolean> | undefined;
+    if (prefs) {
+      setPushOn(prefs.push !== false);
+    }
+  }, [user]);
+
+  const persistPrefs = useCallback(
+    async (next: { push?: boolean }) => {
+      const base = (user?.notificationPrefs as Record<string, unknown>) ?? {};
+      await api.updateProfile({
+        notificationPrefs: { ...base, ...next },
+      });
+      await refreshProfile();
+    },
+    [user, refreshProfile],
+  );
+
+  const logout = async () => {
+    await signOut();
     navigation.getParent()?.dispatch(
       CommonActions.reset({
         index: 0,
@@ -46,7 +65,14 @@ export function SettingsScreen({ navigation }: Props) {
           paddingTop: 20,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
         }}>
-        <Text style={styles.section}>Preferences</Text>
+        <Text style={styles.section}>Profile</Text>
+        <View style={styles.card}>
+          <Text style={styles.name}>{user?.fullName ?? '—'}</Text>
+          <Text style={styles.meta}>{user?.email ?? ''}</Text>
+          <Text style={styles.meta}>Student ID: {user?.studentId ?? '—'}</Text>
+        </View>
+
+        <Text style={[styles.section, styles.mt]}>Preferences</Text>
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.iconBox}>
@@ -55,7 +81,14 @@ export function SettingsScreen({ navigation }: Props) {
             <Text style={styles.rowLabel}>Push Notifications</Text>
             <Switch
               value={pushOn}
-              onValueChange={setPushOn}
+              onValueChange={async v => {
+                setPushOn(v);
+                try {
+                  await persistPrefs({ push: v });
+                } catch {
+                  setPushOn(!v);
+                }
+              }}
               trackColor={{ false: colors.border, true: colors.primaryOrange }}
               thumbColor={colors.white}
             />
@@ -78,7 +111,7 @@ export function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <Text style={[styles.section, styles.mt]}>Preferences</Text>
+        <Text style={[styles.section, styles.mt]}>App</Text>
         <View style={styles.card}>
           <Pressable style={styles.row} onPress={() => {}}>
             <View style={styles.iconBox}>
@@ -89,7 +122,7 @@ export function SettingsScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        <Pressable style={styles.logout} onPress={logout}>
+        <Pressable style={styles.logout} onPress={() => void logout()}>
           <Text style={styles.logoutText}>Log out</Text>
         </Pressable>
         <Text style={styles.version}>Student Voice v0.0.1</Text>
@@ -114,14 +147,24 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
     borderRadius: radii.xl,
-    paddingVertical: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     marginBottom: 8,
+  },
+  name: {
+    ...typography.bodyBold,
+    color: colors.textPrimary,
+  },
+  meta: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingHorizontal: 4,
+    paddingVertical: 10,
     gap: 12,
   },
   iconBox: {
@@ -147,7 +190,7 @@ const styles = StyleSheet.create({
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.border,
-    marginLeft: 64,
+    marginLeft: 56,
   },
   logout: {
     marginTop: 28,

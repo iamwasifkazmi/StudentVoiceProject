@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { TextField } from '../../components/ui/TextField';
+import { api } from '../../services/api';
 import { colors, horizontalPadding, typography } from '../../theme';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -19,6 +21,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ForgotPassword'>;
 
 export function ForgotPasswordScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -39,10 +43,30 @@ export function ForgotPasswordScreen({ navigation }: Props) {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholder="john@example.com"
+            value={email}
+            onChangeText={setEmail}
           />
           <PrimaryButton
             label="Send reset link"
-            onPress={() => navigation.goBack()}
+            loading={loading}
+            onPress={async () => {
+              if (!email.trim()) {
+                Alert.alert('Email required', 'Please enter your email address.');
+                return;
+              }
+              try {
+                setLoading(true);
+                const res = await api.forgotPassword(email.trim());
+                Alert.alert('Request sent', res.message, [
+                  { text: 'OK', onPress: () => navigation.goBack() },
+                ]);
+              } catch (e) {
+                const msg = e instanceof Error ? e.message : 'Request failed';
+                Alert.alert('Error', msg);
+              } finally {
+                setLoading(false);
+              }
+            }}
             style={styles.btn}
           />
         </View>

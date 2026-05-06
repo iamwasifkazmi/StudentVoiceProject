@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { ModuleItem } from '../data/mockData';
+import type { ModuleItem } from '../types/models';
 
 export type SubmitDraft = {
   module: ModuleItem | null;

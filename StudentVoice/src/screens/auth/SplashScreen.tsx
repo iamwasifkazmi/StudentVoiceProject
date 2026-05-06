@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
+import { useAuth } from '../../context/AuthContext';
 import { colors, horizontalPadding, typography } from '../../theme';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -11,6 +12,16 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
 export function SplashScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { isReady, isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+    if (isLoggedIn) {
+      navigation.replace('Main');
+    }
+  }, [isReady, isLoggedIn, navigation]);
 
   return (
     <LinearGradient
