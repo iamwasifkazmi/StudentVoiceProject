@@ -58,6 +58,29 @@ npm run dev
 API base URL: `http://localhost:3000/api`  
 Health check: `GET http://localhost:3000/health`
 
+## Deploy on Vercel (Node / serverless)
+
+This folder is set up for a **Vercel** deployment: `api/index.ts` exports the Express app, and `vercel.json` rewrites all routes to that function.
+
+1. In [Vercel](https://vercel.com) → **Add New…** → **Project** → import this Git repository.
+2. **Root Directory**: set to **`Backend`** (required if the repo also contains the mobile app).
+3. **Framework Preset**: **Other** (or leave default; build is driven by `vercel.json`).
+4. **Environment Variables** (Production — same values as `.env`):
+   - `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`
+   - Optional: `CORS_ORIGIN` (comma-separated origins, or omit for permissive CORS in dev)
+5. Deploy. Prisma Client is generated during **`prisma generate`** (`postinstall` / `buildCommand`).
+6. **Migrations**: run against production from your machine or CI (Vercel builds do not migrate by default):
+
+   ```bash
+   DATABASE_URL="…" DIRECT_URL="…" npx prisma migrate deploy
+   ```
+
+   Or use **Supabase SQL Editor** / `db push` once if you are not using migration history yet.
+
+7. Point the mobile app at **`https://<your-project>.vercel.app`** (same paths as local: `/api/...`, `/health`).
+
+Install the Vercel CLI for previews: `npm i -g vercel`, then from `Backend/` run `vercel`.
+
 ## Response format
 
 - Success: `{ "success": true, "data": ... }`
