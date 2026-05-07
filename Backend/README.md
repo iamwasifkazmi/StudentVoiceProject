@@ -15,7 +15,11 @@ Node.js 20+ **Express** REST API with **Prisma** ORM and **PostgreSQL** (e.g. Su
    cp .env.example .env
    ```
 
-2. Set `DATABASE_URL` (pooled / PgBouncer) and `DIRECT_URL` (direct Postgres for Prisma migrations). URL-encode special characters in the password (`$`, `%`, `/`, `+`, etc.). Set a strong `JWT_SECRET`.
+2. Set `DATABASE_URL` and `DIRECT_URL` from the Supabase dashboard (**Settings → Database**):
+   - **`DATABASE_URL`**: **Transaction pooler**, port **6543**, user typically `postgres.[project-ref]`, and add **`?pgbouncer=true`**. This is what the running API uses.
+   - **`DIRECT_URL`**: **Direct connection** only — host **`db.[project-ref].supabase.co`**, port **5432**, user **`postgres`**. Do **not** point `DIRECT_URL` at `*.pooler.supabase.com`; Prisma migrations need the direct host.
+   - URL-encode special characters in the password (`$`, `%`, `/`, `+`, etc.). Set a strong `JWT_SECRET`.
+   - If you see **`tenant/user ... not found`** or **Can't reach database server**, recheck both strings against the dashboard, confirm the project isn’t paused, and that the pooler **region** in the hostname matches your project (e.g. `aws-0-eu-west-2`).
 
 3. Install dependencies and apply the schema:
 
