@@ -68,6 +68,7 @@ This folder is set up for a **Vercel** deployment: `api/index.ts` exports the Ex
 4. **Environment Variables** (Production — same values as `.env`):
    - `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`
    - Optional: `CORS_ORIGIN` (comma-separated origins, or omit for permissive CORS in dev)
+   - **Important:** `schema.prisma` references **both** `DATABASE_URL` and `DIRECT_URL`. If `DIRECT_URL` is missing on Vercel, you will see **`PrismaClientInitializationError`** on login and refresh, and the mobile app will get **HTTP 500**. For Supabase, `DIRECT_URL` must be the **direct** host (`db.*.supabase.co:5432`), not the pooler. If you only have a single connection string from another provider, set **both** env vars to that same URL.
 5. Deploy. Prisma Client is generated during **`prisma generate`** (`postinstall` / `buildCommand`).
 6. **Migrations**: run against production from your machine or CI (Vercel builds do not migrate by default):
 
@@ -111,7 +112,7 @@ Authenticated routes expect: `Authorization: Bearer <access_token>`.
 
 ## Deploy (Railway / Render)
 
-- Set `DATABASE_URL`, `JWT_SECRET`, and `PORT`.
+- Set `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, and `PORT` (if the platform needs it). Use the same value for `DIRECT_URL` as `DATABASE_URL` if you are not using a separate pooler URL.
 - Build: `npm run build`
 - Start: `npm run start`
 - Run migrations: `npx prisma migrate deploy` (or `db push` only for early prototypes).

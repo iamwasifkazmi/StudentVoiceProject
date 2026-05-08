@@ -13,6 +13,7 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
  */
 const projectRoot = __dirname;
 const nm = path.join(projectRoot, 'node_modules');
+const envShim = path.join(projectRoot, 'env.shim.js');
 
 module.exports = mergeConfig(getDefaultConfig(projectRoot), {
   resolver: {
@@ -21,6 +22,9 @@ module.exports = mergeConfig(getDefaultConfig(projectRoot), {
       'react-native': path.join(nm, 'react-native'),
     },
     resolveRequest: (context, moduleName, platform) => {
+      if (moduleName === '@env') {
+        return { type: 'sourceFile', filePath: envShim };
+      }
       const isReactCore =
         moduleName === 'react' ||
         (typeof moduleName === 'string' && moduleName.startsWith('react/'));
