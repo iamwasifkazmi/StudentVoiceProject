@@ -16,6 +16,7 @@ export const colors = {
   textMuted: '#94A3B8',
   border: '#E2E8F0',
   cardShadow: 'rgba(15, 23, 42, 0.08)',
+  skeleton: '#E2E8F0',
   success: '#10B981',
   successMuted: '#D1FAE5',
   warningMuted: '#FFEDD5',

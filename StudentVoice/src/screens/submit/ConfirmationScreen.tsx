@@ -46,7 +46,6 @@ export function ConfirmationScreen({ navigation }: Props) {
         routes: [{ name: 'SelectModule' }],
       }),
     );
-    navigation.getParent()?.getParent()?.navigate('Home');
   }, [navigation, reset]);
 
   const undo = async () => {
@@ -104,7 +103,7 @@ export function ConfirmationScreen({ navigation }: Props) {
         ) : null}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back to home"
+          accessibilityLabel="Back to module selection"
           onPress={finish}
           style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />

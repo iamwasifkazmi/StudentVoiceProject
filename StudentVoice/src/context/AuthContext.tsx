@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { api, type AuthUser } from '../services/api';
 import { authBridge } from '../services/authBridge';
-import { setAuthHeader } from '../services/http';
+import { bootstrapAuthHeaderFromStorage, setAuthHeader } from '../services/http';
 import * as storage from '../services/storage';
 
 type AuthContextValue = {
@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await storage.saveTokens(access, refresh);
     setAuthHeader(access);
     const profile = await api.getProfile();
+    await storage.saveUserCache(profile);
     setUser(profile);
     setIsLoggedIn(true);
   }, []);
@@ -64,13 +65,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const access = await storage.getAccessToken();
-        if (access) {
-          setAuthHeader(access);
+        const cachedUser = await storage.getUserCache();
+        const hasAuth = await bootstrapAuthHeaderFromStorage();
+        if (!hasAuth) {
+          return;
+        }
+        try {
           const profile = await api.getProfile();
           if (!cancelled) {
+            await storage.saveUserCache(profile);
             setUser(profile);
             setIsLoggedIn(true);
+          }
+        } catch {
+          const stillHas = Boolean(
+            (await storage.getAccessToken()) || (await storage.getRefreshToken()),
+          );
+          if (!cancelled) {
+            if (stillHas) {
+              if (cachedUser) {
+                setUser(cachedUser);
+              }
+              setIsLoggedIn(true);
+            } else {
+              await clearLocal();
+            }
           }
         }
       } catch {
@@ -123,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await api.getProfile();
       setUser(profile);
+      await storage.saveUserCache(profile);
     } catch {
       /* keep last known user */
     }

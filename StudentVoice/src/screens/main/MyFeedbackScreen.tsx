@@ -9,6 +9,7 @@ import { FeedbackThreadCard } from '../../components/feedback/FeedbackThreadCard
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
 import { SearchBar } from '../../components/ui/SearchBar';
 import { api } from '../../services/api';
+import { enrichFeedbackListRow } from '../../services/courseCatalog';
 import { feedbackRowToListItem } from '../../utils/feedbackMappers';
 import type { FeedbackListItem } from '../../types/models';
 import { colors, horizontalPadding } from '../../theme';
@@ -32,7 +33,7 @@ export function MyFeedbackScreen({ navigation }: Props) {
     try {
       setLoading(true);
       const { items: rows } = await api.listFeedback({ limit: '50' });
-      setItems(rows.map(feedbackRowToListItem));
+      setItems(rows.map(r => feedbackRowToListItem(enrichFeedbackListRow(r))));
     } catch {
       setItems([]);
     } finally {

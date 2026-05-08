@@ -123,7 +123,12 @@ export const api = {
       studentCountBadge: number;
     }>(http.get(`/feedback/${id}`)),
 
-  submitFeedback: (body: { moduleId: string; rating: number; comment?: string | null }) =>
+  submitFeedback: (body: {
+    moduleId: string;
+    moduleCode: string;
+    rating: number;
+    comment?: string | null;
+  }) =>
     unwrap<{
       id: string;
       moduleId: string;

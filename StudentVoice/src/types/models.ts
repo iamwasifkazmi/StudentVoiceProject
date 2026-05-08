@@ -26,6 +26,8 @@ export type AlertItem = {
   body: string;
   timeAgo: string;
   isRead?: boolean;
+  /** Links notification to feedback detail when present (API `referenceId`). */
+  referenceId?: string | null;
 };
 
 export type ImpactEntry = {

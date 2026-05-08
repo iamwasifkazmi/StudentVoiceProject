@@ -1,57 +1,13 @@
 import 'dotenv/config';
 import { PrismaClient, FeedbackStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { MODULE_DEFINITIONS } from '../src/lib/moduleCatalog';
 
 const prisma = new PrismaClient();
 
-const MODULES = [
-  {
-    code: 'CO7100',
-    name: 'Research Dissertation',
-    lecturerName: 'Dr Stuart Cunningham',
-    colourHex: '#7C3AED',
-    department: 'Computer Science',
-  },
-  {
-    code: 'CO6050',
-    name: 'Human-Computer Interaction',
-    lecturerName: 'Dr Sarah Jones',
-    colourHex: '#22C55E',
-    department: 'Computer Science',
-  },
-  {
-    code: 'CO6030',
-    name: 'Software Development',
-    lecturerName: 'Dr Mark Taylor',
-    colourHex: '#EF4444',
-    department: 'Computer Science',
-  },
-  {
-    code: 'CO6080',
-    name: 'Cloud Computing',
-    lecturerName: 'Dr Amy Brown',
-    colourHex: '#3B82F6',
-    department: 'Computer Science',
-  },
-  {
-    code: 'CO6070',
-    name: 'Data Science',
-    lecturerName: 'Dr James Wilson',
-    colourHex: '#F97316',
-    department: 'Computer Science',
-  },
-  {
-    code: 'CO6090',
-    name: 'Cyber Security',
-    lecturerName: 'Dr Emma Clark',
-    colourHex: '#14B8A6',
-    department: 'Computer Science',
-  },
-] as const;
-
 async function main() {
   console.log('Seeding modules...');
-  for (const m of MODULES) {
+  for (const m of MODULE_DEFINITIONS) {
     await prisma.module.upsert({
       where: { code: m.code },
       update: {
@@ -60,7 +16,14 @@ async function main() {
         colourHex: m.colourHex,
         department: m.department,
       },
-      create: { ...m },
+      create: {
+        id: m.id,
+        code: m.code,
+        name: m.name,
+        lecturerName: m.lecturerName,
+        colourHex: m.colourHex,
+        department: m.department,
+      },
     });
   }
 
@@ -72,21 +35,33 @@ async function main() {
   const impacts = [
     {
       code: 'CO7100',
-      youSaid: 'Lecture recordings were uploaded too late for revision.',
-      weDid: 'Recordings now uploaded within 24 hours.',
+      youSaid: 'Assignment briefs were unclear about word count expectations.',
+      weDid: 'All briefs have been updated with a word count checklist.',
       studentCount: 47,
     },
     {
-      code: 'CO6050',
-      youSaid: 'Assignment briefs were unclear about word count.',
-      weDid: 'All briefs now include a standardised requirements checklist.',
+      code: 'CO7115',
+      youSaid: 'The Wi-Fi drops constantly near the quiet study zone.',
+      weDid: 'IT Services have scheduled a survey and access point upgrade for that building.',
       studentCount: 31,
     },
     {
-      code: 'CO6030',
-      youSaid: 'Not enough practical coding exercises.',
-      weDid: 'Added 2 additional hands-on labs per module.',
-      studentCount: 53,
+      code: 'CO7210',
+      youSaid: 'The recent assignment was a bit unclear in the requirements.',
+      weDid: 'We added a worked example and a short FAQ to the module page.',
+      studentCount: 52,
+    },
+    {
+      code: 'CO7315',
+      youSaid: 'More worked examples before the coursework would help.',
+      weDid: 'Two new seminars now cover past paper walkthroughs.',
+      studentCount: 28,
+    },
+    {
+      code: 'CO7316',
+      youSaid: 'Lab kit availability was tight near deadlines.',
+      weDid: 'Extra lab slots were added plus an online booking calendar.',
+      studentCount: 36,
     },
   ] as const;
 
@@ -142,7 +117,8 @@ async function main() {
       userId: demo.id,
       moduleId: modMap['CO7100'],
       rating: 4,
-      comment: 'Assignment briefs were unclear about word count expectations.',
+      comment:
+        'Assignment briefs were unclear about word count expectations.',
       status: FeedbackStatus.received,
     },
   });
@@ -150,9 +126,43 @@ async function main() {
   const fb2 = await prisma.feedback.create({
     data: {
       userId: demo.id,
-      moduleId: modMap['CO6050'],
+      moduleId: modMap['CO7115'],
+      rating: 4,
+      comment:
+        'The Wi-Fi drops constantly near the quiet study zone. Makes it hard to work.',
+      status: FeedbackStatus.acted_on,
+    },
+  });
+
+  const fb3 = await prisma.feedback.create({
+    data: {
+      userId: demo.id,
+      moduleId: modMap['CO7210'],
       rating: 5,
-      comment: 'Would love more examples in the slides before coursework deadlines.',
+      comment:
+        'The recent assignment was a bit unclear in the requirements, but the lectures are great.',
+      status: FeedbackStatus.received,
+    },
+  });
+
+  const fb4 = await prisma.feedback.create({
+    data: {
+      userId: demo.id,
+      moduleId: modMap['CO7315'],
+      rating: 3,
+      comment:
+        'The Wi-Fi drops constantly near the quiet study zone. Makes it hard to work.',
+      status: FeedbackStatus.submitted,
+    },
+  });
+
+  const fb5 = await prisma.feedback.create({
+    data: {
+      userId: demo.id,
+      moduleId: modMap['CO7316'],
+      rating: 4,
+      comment:
+        'The Wi-Fi drops constantly near the quiet study zone. Makes it hard to work.',
       status: FeedbackStatus.acted_on,
     },
   });
@@ -169,9 +179,16 @@ async function main() {
       {
         userId: demo.id,
         title: 'Action taken on your feedback',
-        description: 'CO6050 — your feedback has been acted on.',
+        description: 'CO7115 — your feedback has been acted on.',
         type: 'action_taken',
         referenceId: fb2.id,
+      },
+      {
+        userId: demo.id,
+        title: 'Feedback received',
+        description: 'CO7210 — thanks for your comments.',
+        type: 'feedback_received',
+        referenceId: fb3.id,
       },
     ],
   });

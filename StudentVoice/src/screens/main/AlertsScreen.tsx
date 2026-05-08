@@ -40,6 +40,7 @@ export function AlertsScreen({ navigation }: Props) {
           body: r.description,
           timeAgo: formatTimeAgo(r.createdAt),
           isRead: r.isRead,
+          referenceId: r.referenceId,
         })),
       );
     } catch {
@@ -63,8 +64,13 @@ export function AlertsScreen({ navigation }: Props) {
           prev.map(x => (x.id === item.id ? { ...x, isRead: true } : x)),
         );
       }
-      if (item.body) {
-        navigation.getParent()?.navigate('MyFeedback');
+      if (item.referenceId) {
+        navigation.navigate('MyFeedback', {
+          screen: 'FeedbackDetail',
+          params: { feedbackId: item.referenceId },
+        });
+      } else {
+        navigation.navigate('MyFeedback');
       }
     } catch {
       /* ignore */

@@ -10,6 +10,7 @@ import { StatusTracker } from '../../components/feedback/StatusTracker';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
 import { StarRatingInput } from '../../components/submit/StarRatingInput';
 import { api } from '../../services/api';
+import { enrichFeedbackDetail } from '../../services/courseCatalog';
 import { formatTimeAgo } from '../../utils/formatTime';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { MainTabParamList, MyFeedbackStackParamList } from '../../navigation/types';
@@ -48,7 +49,7 @@ export function FeedbackDetailScreen({ navigation }: Props) {
     try {
       setLoading(true);
       const d = await api.getFeedback(feedbackId);
-      setDetail(d);
+      setDetail(enrichFeedbackDetail(d));
     } catch {
       setDetail(null);
     } finally {

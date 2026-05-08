@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { FeedbackStatus, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { resolveModuleForFeedback } from '../lib/ensureModule';
 import { ok, fail } from '../utils/response';
 
 const UNDO_MS = 15_000;
@@ -148,13 +149,14 @@ export async function getFeedback(req: Request, res: Response) {
 export async function createFeedback(req: Request, res: Response) {
   try {
     const userId = req.userId!;
-    const { moduleId, rating, comment } = req.body as {
-      moduleId: string;
+    const { moduleId, moduleCode, rating, comment } = req.body as {
+      moduleId?: string;
+      moduleCode?: string;
       rating: number;
       comment?: string | null;
     };
 
-    const mod = await prisma.module.findUnique({ where: { id: moduleId } });
+    const mod = await resolveModuleForFeedback(moduleId, moduleCode);
     if (!mod) {
       return fail(res, 'Module not found', 404);
     }
@@ -162,7 +164,7 @@ export async function createFeedback(req: Request, res: Response) {
     const feedback = await prisma.feedback.create({
       data: {
         userId,
-        moduleId,
+        moduleId: mod.id,
         rating,
         comment: comment?.trim() || null,
         status: FeedbackStatus.submitted,

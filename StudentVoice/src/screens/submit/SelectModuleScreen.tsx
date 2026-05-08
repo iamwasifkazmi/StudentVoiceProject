@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -10,8 +9,10 @@ import { ModuleSelectCard } from '../../components/submit/ModuleSelectCard';
 import { ProgressSteps } from '../../components/submit/ProgressSteps';
 import { SearchBar } from '../../components/ui/SearchBar';
 import { useSubmitFeedback } from '../../context/SubmitFeedbackContext';
-import { api } from '../../services/api';
-import { moduleFromApi } from '../../utils/moduleMap';
+import {
+  getCatalogModules,
+  moduleItemFromCatalog,
+} from '../../services/courseCatalog';
 import type { ModuleItem } from '../../types/models';
 import { colors, horizontalPadding, typography } from '../../theme';
 import type { MainTabParamList, SubmitStackParamList } from '../../navigation/types';
@@ -28,25 +29,9 @@ export function SelectModuleScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { setModule } = useSubmitFeedback();
   const [q, setQ] = useState('');
-  const [modules, setModules] = useState<ModuleItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      const rows = await api.getModules();
-      setModules(rows.map(moduleFromApi));
-    } catch {
-      setModules([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
+  const modules = useMemo<ModuleItem[]>(
+    () => getCatalogModules().map(moduleItemFromCatalog),
+    [],
   );
 
   const filtered = useMemo(() => {
@@ -69,11 +54,6 @@ export function SelectModuleScreen({ navigation }: Props) {
       <View style={[styles.searchPad, { paddingHorizontal: horizontalPadding }]}>
         <SearchBar value={q} onChangeText={setQ} placeholder="Search modules..." />
       </View>
-      {loading ? (
-        <View style={styles.loader}>
-          <ActivityIndicator size="large" color={colors.primaryRed} />
-        </View>
-      ) : null}
       <ScreenScrollView
         padded={false}
         contentContainerStyle={{
@@ -107,9 +87,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
     backgroundColor: colors.background,
-  },
-  loader: {
-    paddingVertical: 12,
   },
   section: {
     ...typography.subtitle,

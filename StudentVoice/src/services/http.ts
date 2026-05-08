@@ -38,6 +38,24 @@ async function refreshAccessToken(): Promise<string | null> {
   return accessToken;
 }
 
+/** Call on app launch: set Authorization from stored access token, or refresh if access is missing. */
+export async function bootstrapAuthHeaderFromStorage(): Promise<boolean> {
+  const access = await storage.getAccessToken();
+  if (access) {
+    setAuthHeader(access);
+    return true;
+  }
+  const refresh = await storage.getRefreshToken();
+  if (!refresh) {
+    return false;
+  }
+  try {
+    return Boolean(await refreshAccessToken());
+  } catch {
+    return false;
+  }
+}
+
 http.interceptors.response.use(
   r => r,
   async (error: AxiosError) => {

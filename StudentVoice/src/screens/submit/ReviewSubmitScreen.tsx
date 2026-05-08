@@ -86,6 +86,7 @@ export function ReviewSubmitScreen({ navigation }: Props) {
               setSaving(true);
               const fb = await api.submitFeedback({
                 moduleId: draft.module.id,
+                moduleCode: draft.module.code,
                 rating: draft.rating,
                 comment: draft.comment?.trim() || null,
               });

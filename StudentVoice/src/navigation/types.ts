@@ -1,3 +1,4 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -28,9 +29,9 @@ export type SubmitStackParamList = {
 };
 
 export type MainTabParamList = {
-  Home: undefined;
-  MyFeedback: undefined;
-  Submit: undefined;
+  Home: NavigatorScreenParams<HomeStackParamList> | undefined;
+  MyFeedback: NavigatorScreenParams<MyFeedbackStackParamList> | undefined;
+  Submit: NavigatorScreenParams<SubmitStackParamList> | undefined;
   Alerts: undefined;
   Settings: undefined;
 };

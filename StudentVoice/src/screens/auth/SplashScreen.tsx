@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -31,24 +31,31 @@ export function SplashScreen({ navigation }: Props) {
       <View style={[styles.content, { paddingTop: insets.top + 40 }]}>
         <Text style={[typography.hero, styles.title]}>Student Voice</Text>
       </View>
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom, 20), paddingHorizontal: horizontalPadding },
-        ]}>
-        <PrimaryButton
-          label="Log In"
-          variant="orange"
-          onPress={() => navigation.navigate('Login')}
-          style={styles.btn}
-        />
-        <PrimaryButton
-          label="Sign Up"
-          variant="white"
-          onPress={() => navigation.navigate('SignUp')}
-          style={styles.btn}
-        />
-      </View>
+      {isReady && isLoggedIn ? (
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
+          <ActivityIndicator size="large" color={colors.white} />
+        </View>
+      ) : null}
+      {isReady && !isLoggedIn ? (
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: Math.max(insets.bottom, 20), paddingHorizontal: horizontalPadding },
+          ]}>
+          <PrimaryButton
+            label="Log In"
+            variant="orange"
+            onPress={() => navigation.navigate('Login')}
+            style={styles.btn}
+          />
+          <PrimaryButton
+            label="Sign Up"
+            variant="white"
+            onPress={() => navigation.navigate('SignUp')}
+            style={styles.btn}
+          />
+        </View>
+      ) : null}
     </LinearGradient>
   );
 }
