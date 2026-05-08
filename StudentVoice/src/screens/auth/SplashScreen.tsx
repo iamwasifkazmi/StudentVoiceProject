@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -29,6 +36,12 @@ export function SplashScreen({ navigation }: Props) {
       style={styles.gradient}>
       <StatusBar barStyle="light-content" />
       <View style={[styles.content, { paddingTop: insets.top + 40 }]}>
+        <Image
+          accessibilityIgnoresInvertColors
+          source={require('../../assets/splash-icon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={[typography.hero, styles.title]}>Student Voice</Text>
       </View>
       {isReady && isLoggedIn ? (
@@ -68,6 +81,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
   },
   title: {
     color: colors.white,

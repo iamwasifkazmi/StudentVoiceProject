@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Keyboard,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -30,6 +32,24 @@ export function RateCommentScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { draft, setRating, setComment } = useSubmitFeedback();
   const [comment, setCommentLocal] = useState(draft.comment);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, e => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const moduleLabel = draft.module
     ? `${draft.module.code} — ${draft.module.name}`
@@ -57,10 +77,12 @@ export function RateCommentScreen({ navigation }: Props) {
       <ProgressSteps current={2} total={3} />
       <ScreenScrollView
         padded={false}
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
         contentContainerStyle={{
           paddingHorizontal: horizontalPadding,
           paddingTop: 20,
-          paddingBottom: TAB_BAR_SPACE + insets.bottom,
+          paddingBottom:
+            TAB_BAR_SPACE + insets.bottom + keyboardHeight + 32,
         }}>
         <Text style={styles.section}>Rate your experience</Text>
         <Text style={styles.hint}>{moduleLabel}</Text>
