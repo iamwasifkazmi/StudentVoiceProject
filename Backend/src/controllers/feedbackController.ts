@@ -14,6 +14,8 @@ function mapFeedback(
     status: FeedbackStatus;
     createdAt: Date;
     updatedAt: Date;
+    teacherResponse?: string | null;
+    teacherResponseAt?: Date | null;
     module: {
       id: string;
       code: string;
@@ -35,6 +37,8 @@ function mapFeedback(
     status: f.status,
     createdAt: f.createdAt.toISOString(),
     updatedAt: f.updatedAt.toISOString(),
+    teacherResponse: f.teacherResponse ?? null,
+    teacherResponseAt: f.teacherResponseAt?.toISOString() ?? null,
   };
 }
 
@@ -149,6 +153,14 @@ export async function getFeedback(req: Request, res: Response) {
 export async function createFeedback(req: Request, res: Response) {
   try {
     const userId = req.userId!;
+    const actor = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    if (actor?.role === 'teacher') {
+      return fail(res, 'Use the teacher inbox to respond to feedback', 403);
+    }
+
     const { moduleId, moduleCode, rating, comment } = req.body as {
       moduleId?: string;
       moduleCode?: string;
@@ -192,6 +204,14 @@ export async function createFeedback(req: Request, res: Response) {
 export async function deleteFeedback(req: Request, res: Response) {
   try {
     const userId = req.userId!;
+    const actor = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    if (actor?.role === 'teacher') {
+      return fail(res, 'Teachers cannot delete student feedback', 403);
+    }
+
     const { id } = req.params;
 
     const f = await prisma.feedback.findFirst({

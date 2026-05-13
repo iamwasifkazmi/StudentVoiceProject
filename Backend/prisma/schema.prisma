@@ -15,6 +15,11 @@ enum FeedbackStatus {
   acted_on
 }
 
+enum UserRole {
+  student
+  teacher
+}
+
 enum NotificationType {
   feedback_received
   action_taken
@@ -22,17 +27,20 @@ enum NotificationType {
 }
 
 model User {
-  id                 String         @id @default(uuid()) @db.Uuid
-  fullName           String         @map("full_name")
-  email              String         @unique
-  studentId          String         @unique @map("student_id")
-  passwordHash       String         @map("password_hash")
-  notificationPrefs  Json           @default("{}") @map("notification_prefs")
-  createdAt          DateTime       @default(now()) @map("created_at")
-  updatedAt          DateTime       @updatedAt @map("updated_at")
-  feedback           Feedback[]
-  notifications      Notification[]
-  refreshTokens      RefreshToken[]
+  id                       String         @id @default(uuid()) @db.Uuid
+  fullName                 String         @map("full_name")
+  email                    String         @unique
+  studentId                String         @unique @map("student_id")
+  passwordHash             String         @map("password_hash")
+  role                     UserRole       @default(student)
+  anonymousMode            Boolean        @default(false) @map("anonymous_mode")
+  pushNotificationsEnabled Boolean        @default(true) @map("push_notifications_enabled")
+  notificationPrefs        Json           @default("{}") @map("notification_prefs")
+  createdAt                DateTime       @default(now()) @map("created_at")
+  updatedAt                DateTime       @updatedAt @map("updated_at")
+  feedback                 Feedback[]
+  notifications            Notification[]
+  refreshTokens            RefreshToken[]
 
   @@map("users")
 }
@@ -52,17 +60,19 @@ model Module {
 }
 
 model Feedback {
-  id        String          @id @default(uuid()) @db.Uuid
-  userId    String          @map("user_id") @db.Uuid
-  moduleId  String          @map("module_id") @db.Uuid
-  rating    Int
-  comment   String?
-  status    FeedbackStatus  @default(submitted)
-  isDeleted Boolean         @default(false) @map("is_deleted")
-  createdAt DateTime        @default(now()) @map("created_at")
-  updatedAt DateTime        @updatedAt @map("updated_at")
-  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  module    Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @map("user_id") @db.Uuid
+  moduleId          String          @map("module_id") @db.Uuid
+  rating            Int
+  comment           String?
+  status            FeedbackStatus  @default(submitted)
+  isDeleted         Boolean         @default(false) @map("is_deleted")
+  teacherResponse   String?         @map("teacher_response")
+  teacherResponseAt DateTime?       @map("teacher_response_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module            Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([moduleId])

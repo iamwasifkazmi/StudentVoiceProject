@@ -3,7 +3,8 @@ import { body } from 'express-validator';
 export const registerRules = [
   body('fullName').trim().notEmpty().withMessage('fullName is required'),
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-  body('studentId').trim().notEmpty().withMessage('studentId is required'),
+  body('studentId').optional().trim(),
+  body('role').optional().isIn(['student', 'teacher']).withMessage('role must be student or teacher'),
   body('password')
     .isLength({ min: 8 })
     .withMessage('password must be at least 8 characters'),

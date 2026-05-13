@@ -1,10 +1,11 @@
+import { randomUUID } from 'crypto';
 import type { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { hashPassword, verifyPassword } from '../utils/password';
 import { ok, fail } from '../utils/response';
 import { signAccessToken, refreshExpiresAt } from '../utils/jwt';
 import { generateRefreshToken, hashToken } from '../utils/tokens';
-import type { User } from '@prisma/client';
+import type { User, UserRole } from '@prisma/client';
 
 function toPublicUser(u: User) {
   return {
@@ -12,6 +13,9 @@ function toPublicUser(u: User) {
     fullName: u.fullName,
     email: u.email,
     studentId: u.studentId,
+    role: u.role,
+    anonymousMode: u.anonymousMode,
+    pushNotificationsEnabled: u.pushNotificationsEnabled,
     notificationPrefs: u.notificationPrefs,
     createdAt: u.createdAt.toISOString(),
   };
@@ -32,13 +36,22 @@ async function issueTokens(user: User) {
 
 export async function register(req: Request, res: Response) {
   try {
-    const { fullName, email, studentId, password } = req.body as Record<
-      string,
-      string
-    >;
+    const body = req.body as Record<string, string>;
+    const { fullName, email, password } = body;
+    const roleRaw = (body.role ?? 'student').toLowerCase();
+    const role: UserRole = roleRaw === 'teacher' ? 'teacher' : 'student';
+
+    let studentId = (body.studentId ?? '').trim();
+    if (role === 'teacher') {
+      if (!studentId) {
+        studentId = `TEAC-${randomUUID().replace(/-/g, '').slice(0, 16)}`;
+      }
+    } else if (!studentId) {
+      return fail(res, 'studentId is required for students', 400);
+    }
 
     const existing = await prisma.user.findFirst({
-      where: { OR: [{ email }, { studentId }] },
+      where: { OR: [{ email: email.toLowerCase().trim() }, { studentId }] },
     });
     if (existing) {
       return fail(res, 'Email or student ID already registered', 409);
@@ -49,8 +62,11 @@ export async function register(req: Request, res: Response) {
       data: {
         fullName,
         email: email.toLowerCase().trim(),
-        studentId: studentId.trim(),
+        studentId,
         passwordHash,
+        role,
+        anonymousMode: false,
+        pushNotificationsEnabled: true,
         notificationPrefs: {
           push: true,
           email: true,

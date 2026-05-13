@@ -93,18 +93,21 @@ Authenticated routes expect: `Authorization: Bearer <access_token>`.
 
 | Method | Path | Auth |
 |--------|------|------|
-| POST | `/api/auth/register` | Public |
+| POST | `/api/auth/register` | Public (`role`: `student` or `teacher`; `studentId` optional for teachers — auto-generated if omitted) |
 | POST | `/api/auth/login` | Public |
 | POST | `/api/auth/refresh` | Public (body: `refreshToken`) |
 | POST | `/api/auth/forgot-password` | Public (stub — no email sent) |
 | GET | `/api/user/profile` | Yes |
-| PUT | `/api/user/profile` | Yes |
+| PUT | `/api/user/profile` | Yes (`anonymousMode`, `pushNotificationsEnabled`, `notificationPrefs`, `fullName`) |
 | GET | `/api/modules` | Yes |
 | GET | `/api/modules/:id` | Yes |
-| GET | `/api/feedback` | Yes (query: `status`, `moduleId`, `sort`, `page`, `limit`) |
+| GET | `/api/feedback` | Yes — students: own items (query: `status`, `moduleId`, …); includes `teacherResponse` when staff has replied |
 | GET | `/api/feedback/:id` | Yes |
-| POST | `/api/feedback` | Yes (body: `moduleId`, `rating`, `comment?`) |
+| POST | `/api/feedback` | Yes — **students only** (body: `moduleId` or `moduleCode`, `rating`, `comment?`) |
 | DELETE | `/api/feedback/:id` | Yes (undo within 15s of creation) |
+| GET | `/api/teacher/feedback` | Yes — **teachers only** (all submissions; submitter name hidden when student `anonymousMode`) |
+| GET | `/api/teacher/feedback/:id` | Yes — **teachers only** |
+| PUT | `/api/teacher/feedback/:id/response` | Yes — **teachers only** (body: `response`; notifies student in-app) |
 | GET | `/api/impact` | Yes (query: `search`, `moduleId`) |
 | GET | `/api/notifications` | Yes |
 | PUT | `/api/notifications/:id/read` | Yes |

@@ -98,12 +98,39 @@ async function main() {
       fullName: 'Demo Student',
       studentId: '2430001',
       passwordHash,
+      role: 'student',
+      anonymousMode: false,
+      pushNotificationsEnabled: true,
     },
     create: {
       fullName: 'Demo Student',
       email: 'student@chester.ac.uk',
       studentId: '2430001',
       passwordHash,
+      role: 'student',
+      anonymousMode: false,
+      pushNotificationsEnabled: true,
+      notificationPrefs: { push: true, email: true, inApp: true },
+    },
+  });
+
+  console.log('Seeding demo teacher...');
+  await prisma.user.upsert({
+    where: { email: 'teacher@chester.ac.uk' },
+    update: {
+      fullName: 'Demo Teacher',
+      studentId: 'STAFF-0001',
+      passwordHash,
+      role: 'teacher',
+    },
+    create: {
+      fullName: 'Demo Teacher',
+      email: 'teacher@chester.ac.uk',
+      studentId: 'STAFF-0001',
+      passwordHash,
+      role: 'teacher',
+      anonymousMode: false,
+      pushNotificationsEnabled: true,
       notificationPrefs: { push: true, email: true, inApp: true },
     },
   });
@@ -193,7 +220,8 @@ async function main() {
     ],
   });
 
-  console.log('Seed complete. Demo login: student@chester.ac.uk / Password123');
+  console.log('Seed complete. Demo student: student@chester.ac.uk / Password123');
+  console.log('Demo teacher: teacher@chester.ac.uk / Password123');
 }
 
 main()
