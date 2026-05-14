@@ -24,7 +24,7 @@ export function StarRatingInput({ value, onChange, readOnly }: Props) {
             <Ionicons
               name={n <= value ? 'star' : 'star-outline'}
               size={40}
-              color={n <= value ? colors.primaryOrange : colors.border}
+              color={n <= value ? colors.accentGold : colors.border}
             />
           </Pressable>
         ))}

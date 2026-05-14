@@ -42,6 +42,8 @@ export function ReviewSubmitScreen({ navigation }: Props) {
           paddingHorizontal: horizontalPadding,
           paddingTop: 20,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
+          backgroundColor: colors.white,
+          flexGrow: 1,
         }}>
         <Text style={styles.section}>Review &amp; Submit</Text>
         <Text style={styles.hint}>Check everything before submitting</Text>
@@ -59,7 +61,7 @@ export function ReviewSubmitScreen({ navigation }: Props) {
                 key={n}
                 name={n <= draft.rating ? 'star' : 'star-outline'}
                 size={28}
-                color={colors.primaryOrange}
+                color={colors.accentGold}
               />
             ))}
           </View>
@@ -108,7 +110,7 @@ export function ReviewSubmitScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   section: {
     ...typography.subtitle,
@@ -121,15 +123,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderRadius: radii.xl,
     padding: 16,
     marginBottom: 20,
-    shadowColor: colors.cardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   row: {
     flexDirection: 'row',
@@ -173,5 +172,6 @@ const styles = StyleSheet.create({
   },
   btn: {
     width: '100%',
+    borderRadius: 28,
   },
 });

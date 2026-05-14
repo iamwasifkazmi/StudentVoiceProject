@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.md,

@@ -1,18 +1,34 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, radii, typography } from '../../theme';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import type { ImageSourcePropType } from 'react-native';
+import { figmaIcons } from '../../assets/figmaIcons';
+import { colors, radii, spacing, typography } from '../../theme';
+
+export type StatCardKind = 'submitted' | 'actedOn' | 'modules';
+
+const STAT_SOURCES: Record<StatCardKind, ImageSourcePropType> = {
+  submitted: figmaIcons.statSubmitted,
+  actedOn: figmaIcons.statActedOn,
+  modules: figmaIcons.statActedOn,
+};
 
 type Props = {
-  icon: string;
+  kind: StatCardKind;
   value: string;
   label: string;
 };
 
-export function StatCard({ icon, value, label }: Props) {
+export function StatCard({ kind, value, label }: Props) {
   return (
     <View style={styles.card}>
-      <Ionicons name={icon} size={22} color={colors.primaryOrange} />
+      <View style={styles.iconTile}>
+        <Image
+          source={STAT_SOURCES[kind]}
+          style={styles.iconImg}
+          resizeMode="contain"
+          accessibilityIgnoresInvertColors
+        />
+      </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.label}>{label}</Text>
     </View>
@@ -24,8 +40,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     borderRadius: radii.lg,
-    padding: 12,
-    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.sm,
+    alignItems: 'stretch',
     gap: 4,
     shadowColor: colors.cardShadow,
     shadowOffset: { width: 0, height: 2 },
@@ -33,14 +52,31 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  iconTile: {
+    width: 34,
+    height: 34,
+    borderRadius: radii.sm,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-start',
+    marginBottom: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  iconImg: {
+    width: 22,
+    height: 22,
+  },
   value: {
-    ...typography.subtitle,
+    ...typography.bodyBold,
+    fontSize: 14,
     color: colors.textPrimary,
-    fontSize: 18,
+    textAlign: 'left',
   },
   label: {
     ...typography.small,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: 'left',
   },
 });

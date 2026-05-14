@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
-import { colors, radii } from '../../theme';
+import { colors, radii, spacing } from '../../theme';
 
 function SkeletonBlock({
   style,
@@ -53,9 +53,9 @@ function SkeletonBlock({
 function StatCardSkeleton() {
   return (
     <View style={styles.statCard}>
-      <SkeletonBlock width={22} height={22} radius={radii.sm} />
-      <SkeletonBlock width={28} height={20} radius={radii.sm} />
-      <SkeletonBlock width="70%" height={12} radius={radii.pill} />
+      <SkeletonBlock width={34} height={34} radius={radii.sm} />
+      <SkeletonBlock width={36} height={16} radius={radii.sm} />
+      <SkeletonBlock width="100%" height={12} radius={radii.pill} />
     </View>
   );
 }
@@ -127,9 +127,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     borderRadius: radii.lg,
-    padding: 12,
-    alignItems: 'center',
-    gap: 8,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.sm,
+    alignItems: 'flex-start',
+    gap: 4,
     shadowColor: colors.cardShadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,

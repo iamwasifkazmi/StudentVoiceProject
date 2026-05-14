@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image, StyleSheet, TextInput, View } from 'react-native';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { colors, radii, typography } from '../../theme';
 
 type Props = {
@@ -16,7 +16,12 @@ export function SearchBar({
 }: Props) {
   return (
     <View style={styles.wrap}>
-      <Ionicons name="search" size={20} color={colors.textMuted} />
+      <Image
+        source={figmaIcons.search}
+        style={styles.searchIcon}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
+      />
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -39,6 +44,10 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
   },
   input: {
     flex: 1,

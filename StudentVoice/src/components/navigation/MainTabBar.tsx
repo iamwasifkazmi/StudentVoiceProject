@@ -1,7 +1,14 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  type ImageSourcePropType,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import {
   colors,
   fabOffset,
@@ -11,28 +18,33 @@ import {
   typography,
 } from '../../theme';
 
-const TAB_CONFIG: Record<
+const TAB_FIGMA: Record<
   string,
-  { icon: string; iconActive: string; label: string }
+  { idle: ImageSourcePropType; active: ImageSourcePropType; label: string }
 > = {
-  Home: { icon: 'home-outline', iconActive: 'home', label: 'Home' },
+  Home: {
+    idle: figmaIcons.tabHome,
+    active: figmaIcons.tabHomeActive,
+    label: 'Home',
+  },
   MyFeedback: {
-    icon: 'chatbubble-outline',
-    iconActive: 'chatbubble-ellipses',
+    idle: figmaIcons.tabFeedback,
+    active: figmaIcons.tabFeedbackActive,
     label: 'My Feedback',
   },
-  Submit: { icon: 'add', iconActive: 'add', label: 'Submit' },
   Alerts: {
-    icon: 'notifications-outline',
-    iconActive: 'notifications',
+    idle: figmaIcons.tabAlerts,
+    active: figmaIcons.tabAlertsActive,
     label: 'Alerts',
   },
   Settings: {
-    icon: 'settings-outline',
-    iconActive: 'settings',
+    idle: figmaIcons.tabSettings,
+    active: figmaIcons.tabSettingsActive,
     label: 'Settings',
   },
 };
+
+const TAB_ICON_PX = 24;
 
 export function MainTabBar({
   state,
@@ -40,7 +52,6 @@ export function MainTabBar({
   navigation,
   insets,
 }: BottomTabBarProps) {
-
   return (
     <View
       style={[
@@ -52,12 +63,9 @@ export function MainTabBar({
       ]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label =
-          TAB_CONFIG[route.name]?.label ??
-          options.title ??
-          route.name;
+        const pair = TAB_FIGMA[route.name];
+        const label = pair?.label ?? options.title ?? route.name;
         const isFocused = state.index === index;
-        const cfg = TAB_CONFIG[route.name];
 
         const onPress = () => {
           const event = navigation.emit({
@@ -75,12 +83,15 @@ export function MainTabBar({
             <View key={route.key} style={styles.fabSlot}>
               <Pressable
                 onPress={onPress}
-                style={styles.fabOuter}
+                style={styles.fabPress}
                 accessibilityRole="button"
                 accessibilityLabel="Submit feedback">
-                <View style={styles.fabInner}>
-                  <Ionicons name="add" size={28} color={colors.white} />
-                </View>
+                <Image
+                  source={figmaIcons.tabSubmitFab}
+                  style={styles.fabImg}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
               </Pressable>
               <Text
                 style={[
@@ -95,9 +106,6 @@ export function MainTabBar({
           );
         }
 
-        const iconName =
-          isFocused && cfg ? cfg.iconActive : cfg?.icon ?? 'ellipse-outline';
-
         return (
           <Pressable
             key={route.key}
@@ -106,10 +114,11 @@ export function MainTabBar({
             accessibilityLabel={label}
             onPress={onPress}
             style={styles.tab}>
-            <Ionicons
-              name={iconName}
-              size={22}
-              color={isFocused ? colors.primaryOrange : colors.white}
+            <Image
+              source={isFocused && pair ? pair.active : pair?.idle ?? figmaIcons.tabHome}
+              style={styles.tabIcon}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
             />
             <Text
               style={[
@@ -142,6 +151,10 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     gap: 2,
   },
+  tabIcon: {
+    width: TAB_ICON_PX,
+    height: TAB_ICON_PX,
+  },
   fabSlot: {
     flex: 1,
     alignItems: 'center',
@@ -149,11 +162,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingBottom: 4,
   },
-  fabOuter: {
+  fabPress: {
     width: fabSize,
     height: fabSize,
-    borderRadius: fabSize / 2,
-    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -162,13 +173,9 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
-  fabInner: {
-    width: fabSize - 14,
-    height: fabSize - 14,
-    borderRadius: (fabSize - 14) / 2,
-    backgroundColor: colors.primaryOrange,
-    alignItems: 'center',
-    justifyContent: 'center',
+  fabImg: {
+    width: fabSize,
+    height: fabSize,
   },
   navText: {
     color: colors.white,
@@ -183,7 +190,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 3,
     borderRadius: 2,
-    backgroundColor: colors.primaryOrange,
+    backgroundColor: colors.accentGold,
     marginTop: 2,
   },
 });

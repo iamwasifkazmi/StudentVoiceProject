@@ -1,7 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { colors, radii, typography } from '../../theme';
 
 type Props = {
@@ -36,7 +36,12 @@ export function ActionGradientCard({
           <View style={styles.spacer} />
           <View style={styles.footer}>
             <View style={styles.miniBtn}>
-              <Ionicons name="chevron-forward" size={18} color={colors.primaryRed} />
+              <Image
+                source={figmaIcons.chevronRightNavy}
+                style={styles.miniChev}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
             </View>
           </View>
         </View>
@@ -97,5 +102,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  miniChev: {
+    width: 18,
+    height: 18,
   },
 });

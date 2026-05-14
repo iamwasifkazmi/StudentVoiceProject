@@ -9,6 +9,9 @@ export type CachedAuthUser = {
   fullName: string;
   email: string;
   studentId: string;
+  role?: 'student' | 'teacher';
+  anonymousMode?: boolean;
+  pushNotificationsEnabled?: boolean;
   notificationPrefs: Record<string, unknown>;
   createdAt: string;
 };

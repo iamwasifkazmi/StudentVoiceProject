@@ -1,14 +1,15 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
 import { api } from '../../services/api';
 import { formatTimeAgo } from '../../utils/formatTime';
 import type { AlertItem } from '../../types/models';
+import type { ImageSourcePropType } from 'react-native';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { MainTabParamList } from '../../navigation/types';
 
@@ -16,11 +17,8 @@ type Props = BottomTabScreenProps<MainTabParamList, 'Alerts'>;
 
 const TAB_BAR_SPACE = 100;
 
-function iconForType(t: AlertItem['icon'] | string): 'chatbubble-outline' | 'refresh-outline' {
-  if (t === 'refresh') {
-    return 'refresh-outline';
-  }
-  return 'chatbubble-outline';
+function alertIconSource(t: AlertItem['icon'] | string): ImageSourcePropType {
+  return t === 'refresh' ? figmaIcons.alertRefresh : figmaIcons.alertChat;
 }
 
 export function AlertsScreen({ navigation }: Props) {
@@ -101,11 +99,12 @@ export function AlertsScreen({ navigation }: Props) {
               !alert.isRead && styles.unread,
               pressed && { opacity: 0.92 },
             ]}>
-            <View style={styles.iconCircle}>
-              <Ionicons
-                name={iconForType(alert.icon)}
-                size={22}
-                color={colors.textSecondary}
+            <View style={styles.iconSlot}>
+              <Image
+                source={alertIconSource(alert.icon)}
+                style={styles.alertIcon}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
               />
             </View>
             <View style={styles.textCol}>
@@ -145,15 +144,17 @@ const styles = StyleSheet.create({
   },
   unread: {
     borderLeftWidth: 3,
-    borderLeftColor: colors.primaryOrange,
+    borderLeftColor: colors.accentGold,
   },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.background,
+  iconSlot: {
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  alertIcon: {
+    width: 48,
+    height: 48,
   },
   textCol: {
     flex: 1,

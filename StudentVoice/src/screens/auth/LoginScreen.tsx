@@ -95,7 +95,8 @@ const styles = StyleSheet.create({
   welcome: {
     marginBottom: 28,
     color: colors.textPrimary,
-    textAlign: 'center',
+    textAlign: 'left',
+    alignSelf: 'stretch',
   },
   fieldGap: {
     marginTop: 16,
@@ -106,12 +107,13 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     ...typography.caption,
-    color: colors.primaryOrange,
+    color: colors.linkTerracotta,
     fontWeight: '600',
   },
   loginBtn: {
     marginTop: 28,
     width: '100%',
+    borderRadius: 28,
   },
   footerMuted: {
     ...typography.caption,
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     ...typography.caption,
-    color: colors.primaryRed,
+    color: colors.linkTerracotta,
     fontWeight: '700',
   },
 });

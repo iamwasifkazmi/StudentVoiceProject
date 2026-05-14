@@ -142,17 +142,17 @@ export function HomeScreen({ navigation }: Props) {
           <>
             <View style={styles.stats}>
               <StatCard
-                icon="chatbubble-outline"
+                kind="submitted"
                 value={statDigits(dash?.feedbackCount ?? 0)}
                 label="Submitted"
               />
               <StatCard
-                icon="checkmark-circle-outline"
+                kind="actedOn"
                 value={statDigits(dash?.actedOnCount ?? 0)}
                 label="Acted on"
               />
               <StatCard
-                icon="book-outline"
+                kind="modules"
                 value={statDigits(dash?.moduleCount ?? 0)}
                 label="Modules"
               />
@@ -161,13 +161,13 @@ export function HomeScreen({ navigation }: Props) {
               <ActionGradientCard
                 title="Give Feedback"
                 subtitle="Rate a module"
-                colorsGrad={[colors.primaryRed, '#C91840']}
+                colorsGrad={[colors.giveFeedbackPink, colors.primaryRed]}
                 onPress={goSubmit}
               />
               <ActionGradientCard
                 title="See Impact"
                 subtitle="You said / We did"
-                colorsGrad={[colors.primaryOrange, '#E85A2A']}
+                colorsGrad={[colors.impactOrange, colors.impactYellow]}
                 onPress={() => navigation.navigate('SeeImpact')}
               />
             </View>
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     ...typography.caption,
-    color: colors.primaryRed,
+    color: colors.accentGold,
     fontWeight: '600',
   },
 });

@@ -11,11 +11,16 @@ async function unwrap<T>(p: Promise<{ data: Ok<T> | Err }>): Promise<T> {
   return (data as Ok<T>).data;
 }
 
+export type UserRole = 'student' | 'teacher';
+
 export type AuthUser = {
   id: string;
   fullName: string;
   email: string;
   studentId: string;
+  role: UserRole;
+  anonymousMode: boolean;
+  pushNotificationsEnabled: boolean;
   notificationPrefs: Record<string, unknown>;
   createdAt: string;
 };
@@ -33,8 +38,9 @@ export const api = {
   register: (body: {
     fullName: string;
     email: string;
-    studentId: string;
+    studentId?: string;
     password: string;
+    role?: UserRole;
   }) => unwrap<LoginResult>(http.post('/auth/register', body)),
 
   forgotPassword: (email: string) =>
@@ -42,15 +48,26 @@ export const api = {
 
   getProfile: () => unwrap<AuthUser>(http.get('/user/profile')),
 
-  updateProfile: (body: { fullName?: string; notificationPrefs?: Record<string, unknown> }) =>
+  updateProfile: (body: {
+    fullName?: string;
+    notificationPrefs?: Record<string, unknown>;
+    anonymousMode?: boolean;
+    pushNotificationsEnabled?: boolean;
+  }) =>
     unwrap<{
       id: string;
       fullName: string;
       email: string;
       studentId: string;
+      role: UserRole;
+      anonymousMode: boolean;
+      pushNotificationsEnabled: boolean;
       notificationPrefs: Record<string, unknown>;
       updatedAt: string;
     }>(http.put('/user/profile', body)),
+
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    unwrap<{ updated: boolean }>(http.put('/user/password', body)),
 
   getModules: () =>
     unwrap<
@@ -96,6 +113,8 @@ export const api = {
         createdAt: string;
         updatedAt: string;
         weDidPreview: string | null;
+        teacherResponse: string | null;
+        teacherResponseAt: string | null;
       }[];
       pagination: { page: number; limit: number; total: number };
     }>(http.get('/feedback', { params })),
@@ -113,6 +132,8 @@ export const api = {
       status: 'submitted' | 'received' | 'acted_on';
       createdAt: string;
       updatedAt: string;
+      teacherResponse: string | null;
+      teacherResponseAt: string | null;
       closingTheLoop: {
         id: string;
         youSaid: string;
@@ -141,7 +162,65 @@ export const api = {
       status: 'submitted' | 'received' | 'acted_on';
       createdAt: string;
       updatedAt: string;
+      teacherResponse: string | null;
+      teacherResponseAt: string | null;
     }>(http.post('/feedback', body)),
+
+  listTeacherFeedback: (params?: Record<string, string>) =>
+    unwrap<{
+      items: {
+        id: string;
+        moduleId: string;
+        moduleCode: string;
+        moduleName: string;
+        lecturerName: string;
+        moduleColour: string;
+        rating: number;
+        comment: string | null;
+        status: 'submitted' | 'received' | 'acted_on';
+        createdAt: string;
+        updatedAt: string;
+        teacherResponse: string | null;
+        teacherResponseAt: string | null;
+        submitterDisplayName: string;
+        submitterAnonymous: boolean;
+      }[];
+      pagination: { page: number; limit: number; total: number };
+    }>(http.get('/teacher/feedback', { params })),
+
+  getTeacherFeedback: (id: string) =>
+    unwrap<{
+      id: string;
+      moduleId: string;
+      moduleCode: string;
+      moduleName: string;
+      lecturerName: string;
+      moduleColour: string;
+      rating: number;
+      comment: string | null;
+      status: 'submitted' | 'received' | 'acted_on';
+      createdAt: string;
+      updatedAt: string;
+      teacherResponse: string | null;
+      teacherResponseAt: string | null;
+      submitterDisplayName: string;
+      submitterAnonymous: boolean;
+    }>(http.get(`/teacher/feedback/${id}`)),
+
+  respondTeacherFeedback: (id: string, body: { response: string }) =>
+    unwrap<{
+      id: string;
+      teacherResponse: string | null;
+      teacherResponseAt: string | null;
+      status: 'submitted' | 'received' | 'acted_on';
+      moduleId: string;
+      moduleCode: string;
+      moduleName: string;
+      lecturerName: string;
+      moduleColour: string;
+      submitterDisplayName: string;
+      submitterAnonymous: boolean;
+    }>(http.put(`/teacher/feedback/${id}/response`, body)),
 
   deleteFeedback: (id: string) =>
     unwrap<{ id: string; deleted: boolean }>(http.delete(`/feedback/${id}`)),

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, type NavigationProp, type ParamListBase } from '@react-navigation/native';
 import {
+  Image,
   Pressable,
   StyleSheet,
   Switch,
@@ -9,43 +10,57 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
-import type { MainTabParamList } from '../../navigation/types';
+import type { MainTabParamList, TeacherTabParamList } from '../../navigation/types';
 
-type Props = BottomTabScreenProps<MainTabParamList, 'Settings'>;
+type Props =
+  | BottomTabScreenProps<MainTabParamList, 'Settings'>
+  | BottomTabScreenProps<TeacherTabParamList, 'Settings'>;
 
 const TAB_BAR_SPACE = 100;
+
+const ROW_ICON = 40;
 
 export function SettingsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { signOut, user, refreshProfile } = useAuth();
   const [pushOn, setPushOn] = useState(true);
   const [anon, setAnon] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
-    const prefs = user?.notificationPrefs as Record<string, boolean> | undefined;
-    if (prefs) {
-      setPushOn(prefs.push !== false);
+    if (!user) {
+      return;
     }
+    setPushOn(user.pushNotificationsEnabled);
+    setAnon(user.anonymousMode);
   }, [user]);
 
   const persistPrefs = useCallback(
-    async (next: { push?: boolean }) => {
-      const base = (user?.notificationPrefs as Record<string, unknown>) ?? {};
-      await api.updateProfile({
-        notificationPrefs: { ...base, ...next },
-      });
+    async (next: { push?: boolean; anonymousMode?: boolean }) => {
+      const body: Parameters<typeof api.updateProfile>[0] = {};
+      if (typeof next.push === 'boolean') {
+        const base = (user?.notificationPrefs as Record<string, unknown>) ?? {};
+        body.notificationPrefs = { ...base, push: next.push };
+        body.pushNotificationsEnabled = next.push;
+      }
+      if (typeof next.anonymousMode === 'boolean') {
+        body.anonymousMode = next.anonymousMode;
+      }
+      await api.updateProfile(body);
       await refreshProfile();
     },
     [user, refreshProfile],
   );
 
-  const logout = async () => {
+  const performLogout = async () => {
+    setLogoutConfirmOpen(false);
     await signOut();
     navigation.getParent()?.dispatch(
       CommonActions.reset({
@@ -55,8 +70,25 @@ export function SettingsScreen({ navigation }: Props) {
     );
   };
 
+  const openAppSettings = () => {
+    const parent = navigation.getParent() as
+      | NavigationProp<ParamListBase>
+      | undefined;
+    parent?.navigate('AppSettings' as never);
+  };
+
   return (
     <View style={styles.flex}>
+      <ConfirmDialog
+        visible={logoutConfirmOpen}
+        title="Log out?"
+        message="You will need to sign in again to use Student Voice."
+        cancelLabel="No"
+        confirmLabel="Yes"
+        confirmTone="danger"
+        onCancel={() => setLogoutConfirmOpen(false)}
+        onConfirm={() => void performLogout()}
+      />
       <AppHeader title="Settings" />
       <ScreenScrollView
         padded={false}
@@ -64,20 +96,27 @@ export function SettingsScreen({ navigation }: Props) {
           paddingHorizontal: horizontalPadding,
           paddingTop: 20,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
+          backgroundColor: colors.white,
+          flexGrow: 1,
         }}>
         <Text style={styles.section}>Profile</Text>
         <View style={styles.card}>
           <Text style={styles.name}>{user?.fullName ?? '—'}</Text>
           <Text style={styles.meta}>{user?.email ?? ''}</Text>
-          <Text style={styles.meta}>Student ID: {user?.studentId ?? '—'}</Text>
+          <Text style={styles.meta}>
+            {user?.role === 'teacher' ? 'Staff ID' : 'Student ID'}: {user?.studentId ?? '—'}
+          </Text>
         </View>
 
         <Text style={[styles.section, styles.mt]}>Preferences</Text>
         <View style={styles.card}>
           <View style={styles.row}>
-            <View style={styles.iconBox}>
-              <Ionicons name="notifications-outline" size={22} color={colors.textPrimary} />
-            </View>
+            <Image
+              source={figmaIcons.settingsBellTile}
+              style={styles.rowIcon}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
             <Text style={styles.rowLabel}>Push Notifications</Text>
             <Switch
               value={pushOn}
@@ -89,40 +128,60 @@ export function SettingsScreen({ navigation }: Props) {
                   setPushOn(!v);
                 }
               }}
-              trackColor={{ false: colors.border, true: colors.primaryOrange }}
+              trackColor={{ false: colors.border, true: colors.accentGold }}
               thumbColor={colors.white}
             />
           </View>
           <View style={styles.divider} />
-          <View style={styles.row}>
-            <View style={styles.iconBox}>
-              <Ionicons name="shield-outline" size={22} color={colors.textPrimary} />
+          {user?.role !== 'teacher' ? (
+            <View style={styles.row}>
+              <Image
+                source={figmaIcons.settingsShieldTile}
+                style={styles.rowIcon}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+              <View style={styles.col}>
+                <Text style={styles.rowLabel}>Anonymous Mode</Text>
+                <Text style={styles.sub}>Submit feedback without your name</Text>
+              </View>
+              <Switch
+                value={anon}
+                onValueChange={async v => {
+                  setAnon(v);
+                  try {
+                    await persistPrefs({ anonymousMode: v });
+                  } catch {
+                    setAnon(!v);
+                  }
+                }}
+                trackColor={{ false: colors.border, true: colors.primaryRed }}
+                thumbColor={colors.white}
+              />
             </View>
-            <View style={styles.col}>
-              <Text style={styles.rowLabel}>Anonymous Mode</Text>
-              <Text style={styles.sub}>Submit feedback without your name</Text>
-            </View>
-            <Switch
-              value={anon}
-              onValueChange={setAnon}
-              trackColor={{ false: colors.border, true: colors.primaryOrange }}
-              thumbColor={colors.white}
-            />
-          </View>
+          ) : null}
         </View>
 
         <Text style={[styles.section, styles.mt]}>App</Text>
         <View style={styles.card}>
-          <Pressable style={styles.row} onPress={() => {}}>
-            <View style={styles.iconBox}>
-              <Ionicons name="settings-outline" size={22} color={colors.textPrimary} />
-            </View>
+          <Pressable style={styles.row} onPress={openAppSettings}>
+            <Image
+              source={figmaIcons.settingsGearTile}
+              style={styles.rowIcon}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
             <Text style={[styles.rowLabel, { flex: 1 }]}>App Settings</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Image
+              source={figmaIcons.chevronRightMuted}
+              style={styles.rowChevron}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
           </Pressable>
         </View>
 
-        <Pressable style={styles.logout} onPress={() => void logout()}>
+        <Pressable style={styles.logout} onPress={() => setLogoutConfirmOpen(true)}>
           <Text style={styles.logoutText}>Log out</Text>
         </Pressable>
         <Text style={styles.version}>Student Voice v0.0.1</Text>
@@ -134,7 +193,7 @@ export function SettingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   section: {
     ...typography.subtitle,
@@ -145,7 +204,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderRadius: radii.xl,
     paddingVertical: 12,
     paddingHorizontal: 12,
@@ -167,13 +226,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 12,
   },
-  iconBox: {
-    width: 40,
-    height: 40,
+  rowIcon: {
+    width: ROW_ICON,
+    height: ROW_ICON,
     borderRadius: radii.sm,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  rowChevron: {
+    width: 20,
+    height: 20,
   },
   rowLabel: {
     ...typography.bodyBold,

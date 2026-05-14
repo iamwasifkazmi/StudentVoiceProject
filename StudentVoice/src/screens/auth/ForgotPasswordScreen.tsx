@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     ...typography.caption,
-    color: colors.primaryRed,
+    color: colors.linkTerracotta,
     fontWeight: '700',
   },
 });

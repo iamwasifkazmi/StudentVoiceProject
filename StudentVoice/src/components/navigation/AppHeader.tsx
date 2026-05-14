@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -7,6 +8,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { colors, horizontalPadding, typography } from '../../theme';
 
 type Props = {
@@ -63,7 +65,12 @@ export function AppHeader({
             style={styles.backRow}
             accessibilityRole="button"
             accessibilityLabel="Go back">
-            <Ionicons name="chevron-back" size={24} color={colors.white} />
+            <Image
+              source={figmaIcons.backArrowWhite}
+              style={styles.backIconRed}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
             <Text style={[styles.redTitle, typography.subtitle]}>{title}</Text>
           </Pressable>
         ) : (
@@ -92,6 +99,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  backIconRed: {
+    width: 24,
+    height: 24,
   },
   redTitle: {
     color: colors.white,

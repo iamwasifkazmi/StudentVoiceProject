@@ -58,9 +58,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   filled: {
-    backgroundColor: colors.primaryOrange,
+    backgroundColor: colors.accentGold,
   },
   empty: {
-    backgroundColor: '#FDE8E9',
+    backgroundColor: '#E8E8E8',
   },
 });

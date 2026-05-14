@@ -9,6 +9,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   ForgotPassword: undefined;
   Main: undefined;
+  AppSettings: undefined;
 };
 
 export type HomeStackParamList = {
@@ -28,11 +29,21 @@ export type SubmitStackParamList = {
   Confirmation: { feedbackId: string };
 };
 
+export type TeacherFeedbackStackParamList = {
+  TeacherInboxMain: undefined;
+  TeacherFeedbackDetail: { feedbackId: string };
+};
+
 export type MainTabParamList = {
   Home: NavigatorScreenParams<HomeStackParamList> | undefined;
   MyFeedback: NavigatorScreenParams<MyFeedbackStackParamList> | undefined;
   Submit: NavigatorScreenParams<SubmitStackParamList> | undefined;
   Alerts: undefined;
+  Settings: undefined;
+};
+
+export type TeacherTabParamList = {
+  TeacherInbox: NavigatorScreenParams<TeacherFeedbackStackParamList> | undefined;
   Settings: undefined;
 };
 

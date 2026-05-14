@@ -4,7 +4,6 @@ import {
   Image,
   StatusBar,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -12,7 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
-import { colors, horizontalPadding, typography } from '../../theme';
+import { figmaIcons } from '../../assets/figmaIcons';
+import { colors, horizontalPadding } from '../../theme';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
@@ -32,17 +32,16 @@ export function SplashScreen({ navigation }: Props) {
 
   return (
     <LinearGradient
-      colors={[colors.gradientOrangeTop, colors.gradientRedBottom]}
+      colors={[colors.gradientSplashTop, colors.gradientSplashBottom]}
       style={styles.gradient}>
       <StatusBar barStyle="light-content" />
       <View style={[styles.content, { paddingTop: insets.top + 40 }]}>
         <Image
           accessibilityIgnoresInvertColors
-          source={require('../../assets/splash-icon.png')}
+          source={figmaIcons.splashBrandMark}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={[typography.hero, styles.title]}>Student Voice</Text>
       </View>
       {isReady && isLoggedIn ? (
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
@@ -87,14 +86,11 @@ const styles = StyleSheet.create({
     height: 120,
     marginBottom: 20,
   },
-  title: {
-    color: colors.white,
-    textAlign: 'center',
-  },
   footer: {
     gap: 12,
   },
   btn: {
     width: '100%',
+    borderRadius: 28,
   },
 });

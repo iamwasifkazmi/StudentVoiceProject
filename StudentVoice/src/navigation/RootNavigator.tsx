@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
+import { AppSettingsScreen } from '../screens/main/AppSettingsScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
 import { SplashScreen } from '../screens/auth/SplashScreen';
 import { colors } from '../theme';
@@ -29,6 +30,7 @@ export function RootNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="AppSettings" component={AppSettingsScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -101,7 +101,7 @@ export function AuthScreenScaffold({ header, children, footer }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   scrollContent: {
     flexGrow: 1,

@@ -126,7 +126,7 @@ export function RateCommentScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   section: {
     ...typography.subtitle,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   area: {
     minHeight: 140,
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -166,9 +166,11 @@ const styles = StyleSheet.create({
   },
   btn: {
     width: '100%',
+    borderRadius: 28,
   },
   btn2: {
     width: '100%',
     marginTop: 12,
+    borderRadius: 28,
   },
 });

@@ -14,6 +14,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
 
 export function SignUpScreen({ navigation }: Props) {
   const { registerAccount } = useAuth();
+  const [role, setRole] = useState<'student' | 'teacher'>('student');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [studentId, setStudentId] = useState('');
@@ -34,6 +35,30 @@ export function SignUpScreen({ navigation }: Props) {
       }>
       <View style={styles.form}>
         <Text style={[typography.title, styles.heading]}>Create Account</Text>
+
+        <Text style={styles.roleLabel}>I am a</Text>
+        <View style={styles.roleRow}>
+          <Pressable
+            style={[styles.roleChip, role === 'student' && styles.roleChipOn]}
+            onPress={() => setRole('student')}>
+            <Text style={[styles.roleChipText, role === 'student' && styles.roleChipTextOn]}>
+              Student
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.roleChip, role === 'teacher' && styles.roleChipOn]}
+            onPress={() => setRole('teacher')}>
+            <Text style={[styles.roleChipText, role === 'teacher' && styles.roleChipTextOn]}>
+              Teacher
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={styles.roleHint}>
+          {role === 'teacher'
+            ? 'Teachers review submissions and reply to students. Staff ID is optional.'
+            : 'Students submit module feedback and track responses.'}
+        </Text>
+
         <TextField
           label="Full Name"
           placeholder="John Doe"
@@ -50,8 +75,8 @@ export function SignUpScreen({ navigation }: Props) {
           containerStyle={styles.gap}
         />
         <TextField
-          label="Student ID"
-          placeholder="2430001"
+          label={role === 'teacher' ? 'Staff ID (optional)' : 'Student ID'}
+          placeholder={role === 'teacher' ? 'e.g. STAFF-1024' : '2430001'}
           value={studentId}
           onChangeText={setStudentId}
           containerStyle={styles.gap}
@@ -75,9 +100,14 @@ export function SignUpScreen({ navigation }: Props) {
         <PrimaryButton
           label="Sign Up"
           loading={loading}
+          variant="burnt"
           onPress={async () => {
-            if (!fullName.trim() || !email.trim() || !studentId.trim()) {
-              Alert.alert('Missing information', 'Please fill in all fields.');
+            if (!fullName.trim() || !email.trim()) {
+              Alert.alert('Missing information', 'Please enter your name and email.');
+              return;
+            }
+            if (role === 'student' && !studentId.trim()) {
+              Alert.alert('Missing information', 'Please enter your student ID.');
               return;
             }
             if (password.length < 8) {
@@ -93,8 +123,9 @@ export function SignUpScreen({ navigation }: Props) {
               await registerAccount({
                 fullName,
                 email,
-                studentId,
+                studentId: studentId.trim() || undefined,
                 password,
+                role,
               });
               navigation.dispatch(
                 CommonActions.reset({
@@ -123,8 +154,46 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   heading: {
-    marginBottom: 28,
+    marginBottom: 16,
     color: colors.textPrimary,
+    textAlign: 'left',
+    alignSelf: 'stretch',
+  },
+  roleLabel: {
+    ...typography.caption,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: 8,
+  },
+  roleRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  roleChip: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+  },
+  roleChipOn: {
+    borderColor: colors.accentGold,
+    backgroundColor: colors.statusGoldMuted,
+  },
+  roleChipText: {
+    ...typography.bodyBold,
+    color: colors.textSecondary,
+  },
+  roleChipTextOn: {
+    color: colors.primaryRed,
+  },
+  roleHint: {
+    ...typography.small,
+    color: colors.textSecondary,
+    marginBottom: 20,
     textAlign: 'center',
   },
   gap: {
@@ -133,6 +202,7 @@ const styles = StyleSheet.create({
   btn: {
     marginTop: 28,
     width: '100%',
+    borderRadius: 28,
   },
   footerMuted: {
     ...typography.caption,
@@ -140,7 +210,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     ...typography.caption,
-    color: colors.primaryRed,
+    color: colors.linkTerracotta,
     fontWeight: '700',
   },
 });

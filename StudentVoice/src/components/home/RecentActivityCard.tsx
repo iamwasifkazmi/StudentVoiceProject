@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { colors, radii, typography } from '../../theme';
 
 type Props = {
@@ -39,13 +39,18 @@ export function RecentActivityCard({
         {snippet}
       </Text>
       <View style={styles.meta}>
-        <Ionicons name="time-outline" size={14} color={colors.textMuted} />
+        <Image
+          source={figmaIcons.clock}
+          style={styles.metaIcon}
+          resizeMode="contain"
+          accessibilityIgnoresInvertColors
+        />
         <Text style={styles.time}>{timeAgo}</Text>
-        <Ionicons
-          name="chevron-forward"
-          size={18}
-          color={colors.textMuted}
-          style={styles.chev}
+        <Image
+          source={figmaIcons.chevronRightMuted}
+          style={styles.chevImg}
+          resizeMode="contain"
+          accessibilityIgnoresInvertColors
         />
       </View>
     </>
@@ -121,7 +126,13 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     flex: 1,
   },
-  chev: {
+  metaIcon: {
+    width: 14,
+    height: 14,
+  },
+  chevImg: {
+    width: 18,
+    height: 18,
     marginLeft: 'auto',
   },
 });

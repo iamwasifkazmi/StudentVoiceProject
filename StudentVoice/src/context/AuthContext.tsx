@@ -10,6 +10,7 @@ import { api, type AuthUser } from '../services/api';
 import { authBridge } from '../services/authBridge';
 import { bootstrapAuthHeaderFromStorage, setAuthHeader } from '../services/http';
 import * as storage from '../services/storage';
+import { resolveAccountRole } from '../utils/userRole';
 
 type AuthContextValue = {
   isReady: boolean;
@@ -20,14 +21,30 @@ type AuthContextValue = {
   registerAccount: (input: {
     fullName: string;
     email: string;
-    studentId: string;
+    studentId?: string;
     password: string;
+    role?: 'student' | 'teacher';
   }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+function normalizeProfile(u: storage.CachedAuthUser | AuthUser): AuthUser {
+  const role = resolveAccountRole(u);
+  return {
+    id: u.id,
+    fullName: u.fullName,
+    email: u.email,
+    studentId: u.studentId,
+    role,
+    anonymousMode: u.anonymousMode ?? false,
+    pushNotificationsEnabled: u.pushNotificationsEnabled ?? true,
+    notificationPrefs: u.notificationPrefs,
+    createdAt: u.createdAt,
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
@@ -38,8 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await storage.saveTokens(access, refresh);
     setAuthHeader(access);
     const profile = await api.getProfile();
-    await storage.saveUserCache(profile);
-    setUser(profile);
+    const normalized = normalizeProfile(profile);
+    await storage.saveUserCache(normalized);
+    setUser(normalized);
     setIsLoggedIn(true);
   }, []);
 
@@ -72,9 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         try {
           const profile = await api.getProfile();
+          const normalized = normalizeProfile(profile);
           if (!cancelled) {
-            await storage.saveUserCache(profile);
-            setUser(profile);
+            await storage.saveUserCache(normalized);
+            setUser(normalized);
             setIsLoggedIn(true);
           }
         } catch {
@@ -84,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!cancelled) {
             if (stillHas) {
               if (cachedUser) {
-                setUser(cachedUser);
+                setUser(normalizeProfile(cachedUser));
               }
               setIsLoggedIn(true);
             } else {
@@ -117,14 +136,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (input: {
       fullName: string;
       email: string;
-      studentId: string;
+      studentId?: string;
       password: string;
+      role?: 'student' | 'teacher';
     }) => {
       const res = await api.register({
         fullName: input.fullName.trim(),
         email: input.email.trim(),
-        studentId: input.studentId.trim(),
+        studentId: input.studentId?.trim(),
         password: input.password,
+        role: input.role ?? 'student',
       });
       await applySession(res.accessToken, res.refreshToken);
     },
@@ -141,8 +162,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     try {
       const profile = await api.getProfile();
-      setUser(profile);
-      await storage.saveUserCache(profile);
+      const normalized = normalizeProfile(profile);
+      setUser(normalized);
+      await storage.saveUserCache(normalized);
     } catch {
       /* keep last known user */
     }

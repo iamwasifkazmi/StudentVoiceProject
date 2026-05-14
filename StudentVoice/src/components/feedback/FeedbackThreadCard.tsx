@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { colors, radii, typography } from '../../theme';
 import type { FeedbackListItem } from '../../types/models';
 
@@ -26,7 +26,12 @@ export function FeedbackThreadCard({ item, onPress }: Props) {
           <Text style={[styles.badgeText, { color: t.fg }]}>{item.status}</Text>
         </View>
         <View style={styles.timeRow}>
-          <Ionicons name="time-outline" size={14} color={colors.textMuted} />
+          <Image
+            source={figmaIcons.clock}
+            style={styles.clockIcon}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
           <Text style={styles.time}>{item.timeAgo}</Text>
         </View>
       </View>
@@ -39,7 +44,12 @@ export function FeedbackThreadCard({ item, onPress }: Props) {
       </Text>
       {item.responseSnippet ? (
         <View style={styles.responseBox}>
-          <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.textSecondary} />
+          <Image
+            source={figmaIcons.feedbackSnippetBubble}
+            style={styles.snippetGlyph}
+            resizeMode="contain"
+            accessibilityIgnoresInvertColors
+          />
           <Text style={styles.responseText} numberOfLines={2}>
             {item.responseSnippet}
           </Text>
@@ -67,22 +77,33 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: radii.pill,
   },
   badgeText: {
-    ...typography.small,
+    ...typography.navLabel,
+    lineHeight: 13,
     fontWeight: '600',
   },
   timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
+  },
+  clockIcon: {
+    width: 10,
+    height: 10,
   },
   time: {
-    ...typography.small,
+    ...typography.navLabel,
+    fontSize: 10,
+    lineHeight: 12,
     color: colors.textMuted,
+  },
+  snippetGlyph: {
+    width: 16,
+    height: 16,
   },
   titleRow: {
     flexDirection: 'row',

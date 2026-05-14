@@ -12,12 +12,18 @@ type ApiListRow = {
   status: ApiFeedbackStatus;
   createdAt: string;
   weDidPreview: string | null;
+  teacherResponse?: string | null;
 };
 
 export function feedbackRowToListItem(row: ApiListRow): FeedbackListItem {
   const { label, tone } = feedbackStatusToUi(row.status);
   const snippet = row.comment?.trim() || 'No comment provided.';
-  const response = row.weDidPreview ? `We did: ${row.weDidPreview}` : undefined;
+  const staffReply = row.teacherResponse?.trim();
+  const response = staffReply
+    ? `Staff: ${staffReply.slice(0, 80)}${staffReply.length > 80 ? '…' : ''}`
+    : row.weDidPreview
+      ? `We did: ${row.weDidPreview}`
+      : undefined;
   return {
     id: row.id,
     dotColor: row.moduleColour,

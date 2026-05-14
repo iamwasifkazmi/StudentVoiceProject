@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRoute, type RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { figmaIcons } from '../../assets/figmaIcons';
 import { AppHeader } from '../../components/navigation/AppHeader';
 import { StatusTracker } from '../../components/feedback/StatusTracker';
 import { ScreenScrollView } from '../../components/layout/ScreenScrollView';
@@ -106,6 +107,8 @@ export function FeedbackDetailScreen({ navigation }: Props) {
         contentContainerStyle={{
           paddingTop: 16,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
+          backgroundColor: colors.white,
+          flexGrow: 1,
         }}>
         <StatusTracker currentIndex={statusStepIndex(detail.status)} />
         <Text style={styles.moduleTitle}>
@@ -116,7 +119,12 @@ export function FeedbackDetailScreen({ navigation }: Props) {
         </View>
         <View style={styles.block}>
           <View style={styles.rowLabel}>
-            <Ionicons name="chatbubble-ellipses" size={18} color="#1D4ED8" />
+            <Image
+              source={figmaIcons.feedbackYouSaid}
+              style={styles.rowGlyph}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
             <Text style={styles.blockTitle}>You said:</Text>
           </View>
           <View style={styles.card}>
@@ -126,7 +134,12 @@ export function FeedbackDetailScreen({ navigation }: Props) {
         </View>
         <View style={styles.block}>
           <View style={styles.rowLabel}>
-            <Ionicons name="chatbubble-ellipses" size={18} color={colors.success} />
+            <Image
+              source={figmaIcons.feedbackWeDid}
+              style={styles.rowGlyph}
+              resizeMode="contain"
+              accessibilityIgnoresInvertColors
+            />
             <Text style={styles.blockTitle}>We did:</Text>
           </View>
           <View style={styles.card}>
@@ -141,6 +154,20 @@ export function FeedbackDetailScreen({ navigation }: Props) {
             )}
           </View>
         </View>
+        {detail.teacherResponse ? (
+          <View style={styles.block}>
+            <View style={styles.rowLabel}>
+              <Ionicons name="school-outline" size={18} color={colors.primaryRed} />
+              <Text style={styles.blockTitle}>Staff reply:</Text>
+            </View>
+            <View style={[styles.card, styles.staffCard]}>
+              <Text style={styles.cardText}>{detail.teacherResponse}</Text>
+              {detail.teacherResponseAt ? (
+                <Text style={styles.time}>{formatTimeAgo(detail.teacherResponseAt)}</Text>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
       </ScreenScrollView>
     </View>
   );
@@ -149,7 +176,7 @@ export function FeedbackDetailScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   loader: {
     flex: 1,
@@ -184,13 +211,21 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
+  rowGlyph: {
+    width: 18,
+    height: 18,
+  },
   blockTitle: {
     ...typography.bodyBold,
   },
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderRadius: radii.lg,
     padding: 14,
+  },
+  staffCard: {
+    borderWidth: 1,
+    borderColor: colors.primaryRed,
   },
   cardText: {
     ...typography.body,

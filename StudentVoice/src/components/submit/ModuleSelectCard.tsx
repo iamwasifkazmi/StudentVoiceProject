@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { figmaIcons } from '../../assets/figmaIcons';
 import type { ModuleItem } from '../../types/models';
 import { colors, radii, typography } from '../../theme';
 
@@ -29,7 +29,12 @@ export function ModuleSelectCard({ item, onPress }: Props) {
           </Text>
         ) : null}
       </View>
-      <Ionicons name="chevron-forward" size={22} color={colors.textMuted} />
+      <Image
+        source={figmaIcons.chevronRightMuted}
+        style={styles.chevron}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
+      />
     </Pressable>
   );
 }
@@ -38,15 +43,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.inputFill,
     borderRadius: radii.lg,
     padding: 14,
     marginBottom: 12,
-    shadowColor: colors.cardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
   },
   avatar: {
     width: 44,
@@ -62,5 +64,9 @@ const styles = StyleSheet.create({
   },
   textCol: {
     flex: 1,
+  },
+  chevron: {
+    width: 22,
+    height: 22,
   },
 });

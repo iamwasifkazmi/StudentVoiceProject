@@ -1,27 +1,12 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MainTabBar } from '../components/navigation/MainTabBar';
-import { AlertsScreen } from '../screens/main/AlertsScreen';
-import { SettingsScreen } from '../screens/main/SettingsScreen';
-import { HomeStackNavigator } from './HomeStack';
-import { MyFeedbackStackNavigator } from './MyFeedbackStack';
-import { SubmitStackNavigator } from './SubmitStack';
-import type { MainTabParamList } from './types';
-
-const Tab = createBottomTabNavigator<MainTabParamList>();
+import { useAuth } from '../context/AuthContext';
+import { StudentMainTabs } from './StudentMainTabs';
+import { TeacherMainTabs } from './TeacherMainTabs';
 
 export function MainTabNavigator() {
-  return (
-    <Tab.Navigator
-      tabBar={props => <MainTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}>
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
-      <Tab.Screen name="MyFeedback" component={MyFeedbackStackNavigator} />
-      <Tab.Screen name="Submit" component={SubmitStackNavigator} />
-      <Tab.Screen name="Alerts" component={AlertsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
-  );
+  const { user } = useAuth();
+  if (user?.role === 'teacher') {
+    return <TeacherMainTabs />;
+  }
+  return <StudentMainTabs />;
 }

@@ -60,6 +60,8 @@ export function SelectModuleScreen({ navigation }: Props) {
           paddingHorizontal: horizontalPadding,
           paddingTop: 8,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
+          backgroundColor: colors.white,
+          flexGrow: 1,
         }}>
         <Text style={styles.section}>Select module</Text>
         <Text style={styles.hint}>Choose which module to give feedback on</Text>
@@ -81,12 +83,12 @@ export function SelectModuleScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   searchPad: {
     paddingTop: 12,
     paddingBottom: 8,
-    backgroundColor: colors.background,
+    backgroundColor: colors.white,
   },
   section: {
     ...typography.subtitle,

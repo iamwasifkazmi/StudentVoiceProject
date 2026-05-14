@@ -11,7 +11,7 @@ import { colors, radii, typography } from '../../theme';
 type Props = {
   label: string;
   onPress: () => void;
-  variant?: 'orange' | 'red' | 'white' | 'outline';
+  variant?: 'orange' | 'gold' | 'burnt' | 'red' | 'white' | 'outline';
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -26,13 +26,15 @@ export function PrimaryButton({
   style,
 }: Props) {
   const bg =
-    variant === 'orange'
-      ? colors.primaryOrange
-      : variant === 'red'
-        ? colors.primaryRed
-        : variant === 'white'
-          ? colors.white
-          : 'transparent';
+    variant === 'orange' || variant === 'gold'
+      ? colors.accentGold
+      : variant === 'burnt'
+        ? colors.ctaBurntOrange
+        : variant === 'red'
+          ? colors.primaryRed
+          : variant === 'white'
+            ? colors.white
+            : 'transparent';
   const color =
     variant === 'white'
       ? colors.primaryRed
