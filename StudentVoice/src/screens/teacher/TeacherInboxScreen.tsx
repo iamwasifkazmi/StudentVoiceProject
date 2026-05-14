@@ -136,7 +136,9 @@ export function TeacherInboxScreen({ navigation }: Props) {
             ) : (
               <Text style={styles.excerptMuted}>No written comment</Text>
             )}
-            {item.teacherResponse ? (
+            {item.status === 'acted_on' ? (
+              <Text style={styles.replied}>Resolved</Text>
+            ) : item.teacherResponse ? (
               <Text style={styles.replied}>You replied</Text>
             ) : (
               <Text style={styles.pending}>Tap to respond</Text>
