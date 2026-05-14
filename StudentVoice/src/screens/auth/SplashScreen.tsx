@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { useAuth } from '../../context/AuthContext';
 import { figmaIcons } from '../../assets/figmaIcons';
-import { colors, horizontalPadding } from '../../theme';
+import { colors, horizontalPadding, radii } from '../../theme';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
@@ -91,6 +91,6 @@ const styles = StyleSheet.create({
   },
   btn: {
     width: '100%',
-    borderRadius: 28,
+    borderRadius: radii.buttonFull,
   },
 });

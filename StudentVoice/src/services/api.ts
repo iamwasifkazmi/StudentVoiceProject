@@ -93,6 +93,7 @@ export const api = {
         moduleName: string;
         moduleColour: string;
         status: 'submitted' | 'received' | 'acted_on';
+        teacherResponse: string | null;
         snippet: string;
         updatedAt: string;
       }[];
@@ -221,6 +222,25 @@ export const api = {
       submitterDisplayName: string;
       submitterAnonymous: boolean;
     }>(http.put(`/teacher/feedback/${id}/response`, body)),
+
+  markTeacherFeedbackResolved: (id: string) =>
+    unwrap<{
+      id: string;
+      rating: number;
+      comment: string | null;
+      status: 'submitted' | 'received' | 'acted_on';
+      createdAt: string;
+      updatedAt: string;
+      teacherResponse: string | null;
+      teacherResponseAt: string | null;
+      moduleId: string;
+      moduleCode: string;
+      moduleName: string;
+      lecturerName: string;
+      moduleColour: string;
+      submitterDisplayName: string;
+      submitterAnonymous: boolean;
+    }>(http.put(`/teacher/feedback/${id}/resolve`, {})),
 
   deleteFeedback: (id: string) =>
     unwrap<{ id: string; deleted: boolean }>(http.delete(`/feedback/${id}`)),

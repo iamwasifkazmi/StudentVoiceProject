@@ -1,6 +1,6 @@
 import type { FeedbackListItem } from '../types/models';
 import type { ApiFeedbackStatus } from './feedbackUi';
-import { feedbackStatusToUi } from './feedbackUi';
+import { feedbackListRowStatusUi } from './feedbackUi';
 import { formatTimeAgo } from './formatTime';
 
 type ApiListRow = {
@@ -16,7 +16,7 @@ type ApiListRow = {
 };
 
 export function feedbackRowToListItem(row: ApiListRow): FeedbackListItem {
-  const { label, tone } = feedbackStatusToUi(row.status);
+  const { label, tone } = feedbackListRowStatusUi(row);
   const snippet = row.comment?.trim() || 'No comment provided.';
   const staffReply = row.teacherResponse?.trim();
   const response = staffReply

@@ -13,6 +13,7 @@ import { StarRatingInput } from '../../components/submit/StarRatingInput';
 import { api } from '../../services/api';
 import { enrichFeedbackDetail } from '../../services/courseCatalog';
 import { formatTimeAgo } from '../../utils/formatTime';
+import { studentFeedbackDetailTrackerStep } from '../../utils/feedbackUi';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { MainTabParamList, MyFeedbackStackParamList } from '../../navigation/types';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -23,19 +24,6 @@ type Props = CompositeScreenProps<
 >;
 
 const TAB_BAR_SPACE = 24;
-
-function statusStepIndex(status: 'submitted' | 'received' | 'acted_on'): number {
-  switch (status) {
-    case 'submitted':
-      return 1;
-    case 'received':
-      return 2;
-    case 'acted_on':
-      return 3;
-    default:
-      return 1;
-  }
-}
 
 export function FeedbackDetailScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -110,7 +98,12 @@ export function FeedbackDetailScreen({ navigation }: Props) {
           backgroundColor: colors.white,
           flexGrow: 1,
         }}>
-        <StatusTracker currentIndex={statusStepIndex(detail.status)} />
+        <StatusTracker
+          currentIndex={studentFeedbackDetailTrackerStep({
+            status: detail.status,
+            teacherResponse: detail.teacherResponse,
+          })}
+        />
         <Text style={styles.moduleTitle}>
           {detail.moduleCode} – {detail.moduleName}
         </Text>

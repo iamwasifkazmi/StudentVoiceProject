@@ -14,7 +14,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { enrichDashboardRecentActivity } from '../../services/courseCatalog';
 import { formatTimeAgo } from '../../utils/formatTime';
-import { badgeStylesForStatus } from '../../utils/feedbackUi';
+import { badgeStylesForListRow } from '../../utils/feedbackUi';
 import { colors, horizontalPadding, typography } from '../../theme';
 import type { HomeStackParamList } from '../../navigation/types';
 import type { MainTabParamList } from '../../navigation/types';
@@ -37,6 +37,7 @@ type Dashboard = {
     moduleName: string;
     moduleColour: string;
     status: 'submitted' | 'received' | 'acted_on';
+    teacherResponse: string | null;
     snippet: string;
     updatedAt: string;
   }[];
@@ -178,7 +179,10 @@ export function HomeScreen({ navigation }: Props) {
               </Pressable>
             </View>
             {(dash?.recentActivity ?? []).slice(0, 5).map(row => {
-              const badge = badgeStylesForStatus(row.status);
+              const badge = badgeStylesForListRow({
+                status: row.status,
+                teacherResponse: row.teacherResponse,
+              });
               return (
                 <RecentActivityCard
                   key={row.id}

@@ -21,7 +21,7 @@ function pillTone(stepIndex: number, currentIndex: number): PillTone {
     if (stepIndex <= 1) {
       return 'activeRed';
     }
-    if (stepIndex === 2) {
+    if (stepIndex === 2 || stepIndex === 3) {
       return 'activeGold';
     }
     return 'todo';

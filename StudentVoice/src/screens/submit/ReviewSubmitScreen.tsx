@@ -172,6 +172,5 @@ const styles = StyleSheet.create({
   },
   btn: {
     width: '100%',
-    borderRadius: 28,
   },
 });

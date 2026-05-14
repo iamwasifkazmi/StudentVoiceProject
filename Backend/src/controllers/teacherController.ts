@@ -169,3 +169,64 @@ export async function respondToFeedback(req: Request, res: Response) {
     return fail(res, 'Failed to save response', 500);
   }
 }
+
+export async function markFeedbackResolved(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const f = await prisma.feedback.findFirst({
+      where: { id, isDeleted: false },
+      include: { module: true, user: true },
+    });
+    if (!f) {
+      return fail(res, 'Feedback not found', 404);
+    }
+
+    if (f.status === FeedbackStatus.acted_on) {
+      return ok(res, {
+        id: f.id,
+        rating: f.rating,
+        comment: f.comment,
+        status: f.status,
+        createdAt: f.createdAt.toISOString(),
+        updatedAt: f.updatedAt.toISOString(),
+        teacherResponse: f.teacherResponse,
+        teacherResponseAt: f.teacherResponseAt?.toISOString() ?? null,
+        ...mapModule(f.module),
+        ...submitterPublic(f.user),
+      });
+    }
+
+    const updated = await prisma.feedback.update({
+      where: { id: f.id },
+      data: { status: FeedbackStatus.acted_on },
+      include: { module: true, user: { select: { fullName: true, anonymousMode: true } } },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: f.userId,
+        title: 'Feedback resolved',
+        description: `${updated.module.code} — staff marked your feedback as resolved.`,
+        type: 'action_taken',
+        referenceId: updated.id,
+      },
+    });
+
+    return ok(res, {
+      id: updated.id,
+      rating: updated.rating,
+      comment: updated.comment,
+      status: updated.status,
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+      teacherResponse: updated.teacherResponse,
+      teacherResponseAt: updated.teacherResponseAt?.toISOString() ?? null,
+      ...mapModule(updated.module),
+      ...submitterPublic(updated.user),
+    });
+  } catch (e) {
+    console.error(e);
+    return fail(res, 'Failed to mark resolved', 500);
+  }
+}

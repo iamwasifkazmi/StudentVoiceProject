@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -32,22 +33,46 @@ export function TeacherInboxScreen({ navigation }: Props) {
     Awaited<ReturnType<typeof api.listTeacherFeedback>>['items']
   >([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (mode: 'initial' | 'pull' = 'initial') => {
     try {
-      setLoading(true);
+      if (mode === 'pull') {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setLoadError(null);
       const { items: rows } = await api.listTeacherFeedback({ limit: '50' });
       setItems(rows.map(r => enrichFeedbackListRow(r)));
-    } catch {
+    } catch (e: unknown) {
       setItems([]);
+      let msg = 'Could not load inbox.';
+      if (e && typeof e === 'object' && 'response' in e) {
+        const ax = e as { response?: { status?: number; data?: { error?: string } } };
+        const errBody = ax.response?.data?.error;
+        if (typeof errBody === 'string' && errBody.length > 0) {
+          msg = errBody;
+        } else if (ax.response?.status === 403) {
+          msg =
+            'Teacher access only. Sign in with a staff account, or ask your admin to set your role to teacher.';
+        } else if (ax.response?.status === 401) {
+          msg = 'Session expired. Please sign in again.';
+        }
+      } else if (e instanceof Error) {
+        msg = e.message;
+      }
+      setLoadError(msg);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      void load();
+      void load('initial');
     }, [load]),
   );
 
@@ -61,11 +86,22 @@ export function TeacherInboxScreen({ navigation }: Props) {
       ) : null}
       <ScreenScrollView
         padded={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => void load('pull')}
+            tintColor={colors.primaryRed}
+            colors={[colors.primaryRed]}
+          />
+        }
         contentContainerStyle={{
           paddingHorizontal: horizontalPadding,
           paddingTop: 16,
           paddingBottom: TAB_BAR_SPACE + insets.bottom,
         }}>
+        {loadError ? (
+          <Text style={styles.error}>{loadError}</Text>
+        ) : null}
         {items.map(item => (
           <Pressable
             key={item.id}
@@ -107,7 +143,7 @@ export function TeacherInboxScreen({ navigation }: Props) {
             )}
           </Pressable>
         ))}
-        {!loading && items.length === 0 ? (
+        {!loading && !loadError && items.length === 0 ? (
           <Text style={styles.empty}>No feedback submissions yet.</Text>
         ) : null}
       </ScreenScrollView>
@@ -122,6 +158,13 @@ const styles = StyleSheet.create({
   },
   loader: {
     paddingVertical: 24,
+  },
+  error: {
+    ...typography.caption,
+    color: colors.primaryRed,
+    textAlign: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
   card: {
     backgroundColor: colors.white,

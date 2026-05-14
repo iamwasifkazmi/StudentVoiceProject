@@ -41,6 +41,7 @@ export async function dashboard(req: Request, res: Response) {
         moduleName: r.module.name,
         moduleColour: r.module.colourHex,
         status: r.status,
+        teacherResponse: r.teacherResponse,
         snippet: r.comment?.slice(0, 120) ?? '',
         updatedAt: r.updatedAt.toISOString(),
       })),

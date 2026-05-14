@@ -110,8 +110,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   successMark: {
-    width: 120,
-    height: 120,
+    width: 80,
+    height: 80,
   },
   title: {
     ...typography.title,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   btnOutline: {
     width: '100%',
     minHeight: 52,
-    borderRadius: radii.lg,
+    borderRadius: radii.buttonFull,
     borderWidth: 2,
     borderColor: colors.white,
     backgroundColor: 'rgba(255,255,255,0.12)',
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   btnGold: {
     width: '100%',
     minHeight: 52,
-    borderRadius: radii.lg,
+    borderRadius: radii.buttonFull,
     backgroundColor: colors.accentGold,
     alignItems: 'center',
     justifyContent: 'center',

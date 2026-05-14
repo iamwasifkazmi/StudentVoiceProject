@@ -21,6 +21,8 @@ export const radii = {
   lg: 16,
   xl: 20,
   pill: 999,
+  /** Full-width primary / CTA buttons (Figma-aligned). */
+  buttonFull: 15,
 } as const;
 
 export const tabBarHeight = Platform.select({ ios: 52, default: 56 });

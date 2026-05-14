@@ -166,11 +166,9 @@ const styles = StyleSheet.create({
   },
   btn: {
     width: '100%',
-    borderRadius: 28,
   },
   btn2: {
     width: '100%',
     marginTop: 12,
-    borderRadius: 28,
   },
 });

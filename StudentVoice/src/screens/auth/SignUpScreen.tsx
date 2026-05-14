@@ -7,7 +7,7 @@ import { AppHeader } from '../../components/navigation/AppHeader';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
 import { TextField } from '../../components/ui/TextField';
 import { useAuth } from '../../context/AuthContext';
-import { colors, typography } from '../../theme';
+import { colors, radii, typography } from '../../theme';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   btn: {
     marginTop: 28,
     width: '100%',
-    borderRadius: 28,
+    borderRadius: radii.buttonFull,
   },
   footerMuted: {
     ...typography.caption,

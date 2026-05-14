@@ -11,6 +11,7 @@ r.use(requireAuth, requireTeacher);
 
 r.get('/feedback', teacher.listAllFeedback);
 r.get('/feedback/:id', teacher.getFeedbackDetail);
+r.put('/feedback/:id/resolve', teacher.markFeedbackResolved);
 r.put('/feedback/:id/response', teacherRespondRules, handleValidation, teacher.respondToFeedback);
 
 export default r;

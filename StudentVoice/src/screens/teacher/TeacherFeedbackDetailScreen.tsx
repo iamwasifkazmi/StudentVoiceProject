@@ -20,6 +20,7 @@ import { StarRatingInput } from '../../components/submit/StarRatingInput';
 import { api } from '../../services/api';
 import { enrichFeedbackDetail } from '../../services/courseCatalog';
 import { formatTimeAgo } from '../../utils/formatTime';
+import { feedbackListRowStatusUi } from '../../utils/feedbackUi';
 import { colors, horizontalPadding, radii, typography } from '../../theme';
 import type { TeacherFeedbackStackParamList, TeacherTabParamList } from '../../navigation/types';
 
@@ -40,6 +41,7 @@ export function TeacherFeedbackDetailScreen({ navigation }: Props) {
   );
   const [responseText, setResponseText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -100,6 +102,28 @@ export function TeacherFeedbackDetailScreen({ navigation }: Props) {
     }
   };
 
+  const markResolved = async () => {
+    if (detail.status === 'acted_on') {
+      return;
+    }
+    try {
+      setResolving(true);
+      await api.markTeacherFeedbackResolved(feedbackId);
+      await load();
+      Alert.alert('Updated', 'The student will see this as resolved in their feedback details.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not update';
+      Alert.alert('Error', msg);
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const statusLabel = feedbackListRowStatusUi({
+    status: detail.status,
+    teacherResponse: detail.teacherResponse,
+  }).label;
+
   return (
     <View style={styles.flex}>
       <AppHeader title="Respond to feedback" onBackPress={() => navigation.goBack()} />
@@ -113,7 +137,7 @@ export function TeacherFeedbackDetailScreen({ navigation }: Props) {
           {detail.moduleCode} – {detail.moduleName}
         </Text>
         <Text style={styles.meta}>
-          {formatTimeAgo(detail.createdAt)} · Status: {detail.status.replace('_', ' ')}
+          {formatTimeAgo(detail.createdAt)} · Status: {statusLabel}
         </Text>
         <View style={styles.row}>
           <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
@@ -163,6 +187,19 @@ export function TeacherFeedbackDetailScreen({ navigation }: Props) {
           onPress={() => void submit()}
           style={styles.btn}
         />
+        {detail.status === 'acted_on' ? (
+          <Text style={styles.resolvedNote}>
+            This item is marked resolved. Students see it as closed in their progress bar.
+          </Text>
+        ) : (
+          <PrimaryButton
+            label="Mark as resolved"
+            variant="burnt"
+            loading={resolving}
+            onPress={() => void markResolved()}
+            style={styles.btnResolve}
+          />
+        )}
       </ScreenScrollView>
     </View>
   );
@@ -190,7 +227,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
     marginTop: 6,
-    textTransform: 'capitalize',
   },
   row: {
     flexDirection: 'row',
@@ -263,5 +299,15 @@ const styles = StyleSheet.create({
   btn: {
     marginTop: 20,
     width: '100%',
+  },
+  btnResolve: {
+    marginTop: 12,
+    width: '100%',
+  },
+  resolvedNote: {
+    ...typography.small,
+    color: colors.textSecondary,
+    marginTop: 14,
+    textAlign: 'center',
   },
 });
