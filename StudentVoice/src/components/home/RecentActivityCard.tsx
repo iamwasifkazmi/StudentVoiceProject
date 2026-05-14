@@ -100,15 +100,18 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     ...typography.bodyBold,
+    fontSize: 14,
+    lineHeight: 18,
     flex: 1,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: radii.pill,
   },
   badgeText: {
-    ...typography.small,
+    ...typography.navLabel,
+    lineHeight: 13,
     fontWeight: '600',
   },
   snippet: {
@@ -122,17 +125,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   time: {
-    ...typography.small,
+    ...typography.navLabel,
+    fontSize: 10,
+    lineHeight: 12,
     color: colors.textMuted,
     flex: 1,
   },
   metaIcon: {
-    width: 14,
-    height: 14,
+    width: 10,
+    height: 10,
   },
   chevImg: {
-    width: 18,
-    height: 18,
+    width: 14,
+    height: 14,
     marginLeft: 'auto',
   },
 });

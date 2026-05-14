@@ -212,8 +212,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   rowGlyph: {
-    width: 18,
-    height: 18,
+    width: 16,
+    height: 16,
   },
   blockTitle: {
     ...typography.bodyBold,

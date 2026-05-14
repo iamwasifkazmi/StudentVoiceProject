@@ -37,7 +37,7 @@ export function AppHeader({
             style={styles.backRow}
             accessibilityRole="button"
             accessibilityLabel="Go back">
-            <Ionicons name="chevron-back" size={28} color={colors.textPrimary} />
+            <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
             <Text style={[typography.title, { color: colors.textPrimary }]}>
               {title}
             </Text>
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   /** Align with title text when a back chevron sits to the left of the title */
   subtitleWithBack: {
-    marginLeft: 28,
+    marginLeft: 24,
   },
   minimalWrap: {
     backgroundColor: colors.background,

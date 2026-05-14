@@ -25,4 +25,7 @@ export const radii = {
 
 export const tabBarHeight = Platform.select({ ios: 52, default: 56 });
 export const fabSize = 56;
-export const fabOffset = 24;
+/** Vertical lift of the center FAB above the tab row (matches negative margin on the FAB slot). */
+export const fabOffset = 32;
+/** Top padding inside the red tab bar; keep small so the FAB reads as floating like Figma. */
+export const tabBarTopPad = 6;

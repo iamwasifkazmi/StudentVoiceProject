@@ -27,7 +27,7 @@ export function SearchBar({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textMuted}
-        style={[styles.input, typography.body]}
+        style={[styles.input, typography.body, { fontSize: 14, lineHeight: 18 }]}
       />
     </View>
   );
@@ -39,15 +39,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.white,
     borderRadius: radii.lg,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
     borderWidth: 1,
     borderColor: colors.border,
   },
   searchIcon: {
-    width: 20,
-    height: 20,
+    width: 16,
+    height: 16,
   },
   input: {
     flex: 1,

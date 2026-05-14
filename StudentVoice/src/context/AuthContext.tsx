@@ -27,6 +27,10 @@ type AuthContextValue = {
   }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  /** Merge fields from PUT /user/profile (avoids stale GET flipping toggles). */
+  applyServerProfileUpdate: (
+    patch: Awaited<ReturnType<typeof api.updateProfile>>,
+  ) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -170,6 +174,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoggedIn]);
 
+  const applyServerProfileUpdate = useCallback(
+    (patch: Awaited<ReturnType<typeof api.updateProfile>>) => {
+      setUser(prev => {
+        if (!prev) {
+          return prev;
+        }
+        const merged = normalizeProfile({
+          ...prev,
+          ...patch,
+          createdAt: prev.createdAt,
+        });
+        void storage.saveUserCache(merged);
+        return merged;
+      });
+    },
+    [],
+  );
+
   const userName = user?.fullName ?? 'Student';
 
   const value = useMemo(
@@ -182,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       registerAccount,
       signOut,
       refreshProfile,
+      applyServerProfileUpdate,
     }),
     [
       isReady,
@@ -192,6 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       registerAccount,
       signOut,
       refreshProfile,
+      applyServerProfileUpdate,
     ],
   );
 

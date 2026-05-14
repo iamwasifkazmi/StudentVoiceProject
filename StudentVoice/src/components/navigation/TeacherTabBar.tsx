@@ -65,15 +65,10 @@ export function TeacherTabBar({
             style={styles.tab}>
             <Ionicons
               name={iconName}
-              size={24}
+              size={22}
               color={isFocused ? colors.accentGold : colors.white}
             />
-            <Text
-              style={[
-                styles.navText,
-                typography.navLabel,
-                isFocused && styles.navTextActive,
-              ]}>
+            <Text style={[styles.navText, isFocused && styles.navTextActive]}>
               {label}
             </Text>
             {isFocused ? <View style={styles.underline} /> : null}
@@ -101,6 +96,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   navText: {
+    ...typography.navLabel,
+    fontSize: 10,
+    lineHeight: 12,
     color: colors.white,
     marginTop: 2,
     textAlign: 'center',
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   underline: {
-    width: 28,
+    width: 24,
     height: 3,
     borderRadius: 2,
     backgroundColor: colors.accentGold,

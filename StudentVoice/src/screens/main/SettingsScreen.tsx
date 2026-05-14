@@ -25,11 +25,14 @@ type Props =
 
 const TAB_BAR_SPACE = 100;
 
-const ROW_ICON = 40;
+const ROW_ICON = 32;
+const ROW_CHEVRON = 16;
+const ROW_GAP = 10;
+const ROW_DIVIDER_INSET = 4 + ROW_ICON + ROW_GAP;
 
 export function SettingsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { signOut, user, refreshProfile } = useAuth();
+  const { signOut, user, applyServerProfileUpdate } = useAuth();
   const [pushOn, setPushOn] = useState(true);
   const [anon, setAnon] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -53,10 +56,10 @@ export function SettingsScreen({ navigation }: Props) {
       if (typeof next.anonymousMode === 'boolean') {
         body.anonymousMode = next.anonymousMode;
       }
-      await api.updateProfile(body);
-      await refreshProfile();
+      const updated = await api.updateProfile(body);
+      applyServerProfileUpdate(updated);
     },
-    [user, refreshProfile],
+    [user, applyServerProfileUpdate],
   );
 
   const performLogout = async () => {
@@ -196,8 +199,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   section: {
-    ...typography.subtitle,
-    marginBottom: 10,
+    ...typography.bodyBold,
+    fontSize: 15,
+    lineHeight: 19,
+    marginBottom: 8,
     color: colors.textPrimary,
   },
   mt: {
@@ -212,10 +217,13 @@ const styles = StyleSheet.create({
   },
   name: {
     ...typography.bodyBold,
+    fontSize: 15,
+    lineHeight: 20,
     color: colors.textPrimary,
   },
   meta: {
-    ...typography.caption,
+    ...typography.small,
+    lineHeight: 16,
     color: colors.textSecondary,
     marginTop: 4,
   },
@@ -224,7 +232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 4,
     paddingVertical: 10,
-    gap: 12,
+    gap: ROW_GAP,
   },
   rowIcon: {
     width: ROW_ICON,
@@ -232,25 +240,28 @@ const styles = StyleSheet.create({
     borderRadius: radii.sm,
   },
   rowChevron: {
-    width: 20,
-    height: 20,
+    width: ROW_CHEVRON,
+    height: ROW_CHEVRON,
   },
   rowLabel: {
     ...typography.bodyBold,
+    fontSize: 14,
+    lineHeight: 18,
     flex: 1,
   },
   col: {
     flex: 1,
   },
   sub: {
-    ...typography.small,
+    ...typography.navLabel,
+    lineHeight: 14,
     color: colors.textSecondary,
     marginTop: 2,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: colors.border,
-    marginLeft: 56,
+    marginLeft: ROW_DIVIDER_INSET,
   },
   logout: {
     marginTop: 28,
@@ -259,10 +270,12 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     ...typography.bodyBold,
+    fontSize: 14,
     color: colors.primaryRed,
   },
   version: {
-    ...typography.small,
+    ...typography.navLabel,
+    fontSize: 10,
     color: colors.textMuted,
     textAlign: 'center',
     marginTop: 8,

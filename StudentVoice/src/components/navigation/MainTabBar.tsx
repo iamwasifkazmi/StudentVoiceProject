@@ -15,6 +15,7 @@ import {
   fabSize,
   horizontalPadding,
   tabBarHeight,
+  tabBarTopPad,
   typography,
 } from '../../theme';
 
@@ -44,7 +45,7 @@ const TAB_FIGMA: Record<
   },
 };
 
-const TAB_ICON_PX = 24;
+const TAB_ICON_PX = 22;
 
 export function MainTabBar({
   state,
@@ -94,11 +95,7 @@ export function MainTabBar({
                 />
               </Pressable>
               <Text
-                style={[
-                  styles.navText,
-                  typography.navLabel,
-                  isFocused && styles.navTextActive,
-                ]}>
+                style={[styles.navText, isFocused && styles.navTextActive]}>
                 {label}
               </Text>
               {isFocused ? <View style={styles.underline} /> : null}
@@ -121,11 +118,7 @@ export function MainTabBar({
               accessibilityIgnoresInvertColors
             />
             <Text
-              style={[
-                styles.navText,
-                typography.navLabel,
-                isFocused && styles.navTextActive,
-              ]}>
+              style={[styles.navText, isFocused && styles.navTextActive]}>
               {label}
             </Text>
           </Pressable>
@@ -142,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: colors.primaryRed,
     minHeight: tabBarHeight + fabOffset,
-    paddingTop: fabOffset,
+    paddingTop: tabBarTopPad,
   },
   tab: {
     flex: 1,
@@ -178,6 +171,9 @@ const styles = StyleSheet.create({
     height: fabSize,
   },
   navText: {
+    ...typography.navLabel,
+    fontSize: 10,
+    lineHeight: 12,
     color: colors.white,
     marginTop: 2,
     textAlign: 'center',
@@ -187,7 +183,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   underline: {
-    width: 28,
+    width: 24,
     height: 3,
     borderRadius: 2,
     backgroundColor: colors.accentGold,
