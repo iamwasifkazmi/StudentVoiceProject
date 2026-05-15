@@ -49,13 +49,13 @@ export function SignUpScreen({ navigation }: Props) {
             style={[styles.roleChip, role === 'teacher' && styles.roleChipOn]}
             onPress={() => setRole('teacher')}>
             <Text style={[styles.roleChipText, role === 'teacher' && styles.roleChipTextOn]}>
-              Teacher
+              Staff
             </Text>
           </Pressable>
         </View>
         <Text style={styles.roleHint}>
           {role === 'teacher'
-            ? 'Teachers review submissions and reply to students. Staff ID is optional.'
+            ? 'Staff review submissions and reply to students. Staff ID is optional.'
             : 'Students submit module feedback and track responses.'}
         </Text>
 

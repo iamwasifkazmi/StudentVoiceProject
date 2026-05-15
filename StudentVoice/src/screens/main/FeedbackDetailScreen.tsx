@@ -83,7 +83,10 @@ export function FeedbackDetailScreen({ navigation }: Props) {
     detail.comment?.trim() ||
     primaryLoop?.youSaid ||
     'No comment was provided for this submission.';
-  const weText = primaryLoop?.weDid ?? 'No official response recorded yet.';
+  const officialWeDid = primaryLoop?.weDid?.trim();
+  const hasStaffReply = Boolean(detail.teacherResponse?.trim());
+  const showWeDidSection = !hasStaffReply || Boolean(officialWeDid);
+  const weText = officialWeDid ?? 'No official response recorded yet.';
 
   return (
     <View style={styles.flex}>
@@ -125,28 +128,30 @@ export function FeedbackDetailScreen({ navigation }: Props) {
             <Text style={styles.time}>{formatTimeAgo(detail.createdAt)}</Text>
           </View>
         </View>
-        <View style={styles.block}>
-          <View style={styles.rowLabel}>
-            <Image
-              source={figmaIcons.feedbackWeDid}
-              style={styles.rowGlyph}
-              resizeMode="contain"
-              accessibilityIgnoresInvertColors
-            />
-            <Text style={styles.blockTitle}>We did:</Text>
+        {showWeDidSection ? (
+          <View style={styles.block}>
+            <View style={styles.rowLabel}>
+              <Image
+                source={figmaIcons.feedbackWeDid}
+                style={styles.rowGlyph}
+                resizeMode="contain"
+                accessibilityIgnoresInvertColors
+              />
+              <Text style={styles.blockTitle}>We did:</Text>
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.cardText}>{weText}</Text>
+              {primaryLoop ? (
+                <Text style={styles.time}>
+                  {detail.studentCountBadge} students ·{' '}
+                  {formatTimeAgo(primaryLoop.createdAt)}
+                </Text>
+              ) : (
+                <Text style={styles.time}>Closing the loop</Text>
+              )}
+            </View>
           </View>
-          <View style={styles.card}>
-            <Text style={styles.cardText}>{weText}</Text>
-            {primaryLoop ? (
-              <Text style={styles.time}>
-                {detail.studentCountBadge} students ·{' '}
-                {formatTimeAgo(primaryLoop.createdAt)}
-              </Text>
-            ) : (
-              <Text style={styles.time}>Closing the loop</Text>
-            )}
-          </View>
-        </View>
+        ) : null}
         {detail.teacherResponse ? (
           <View style={styles.block}>
             <View style={styles.rowLabel}>

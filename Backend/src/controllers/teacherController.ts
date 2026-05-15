@@ -134,6 +134,9 @@ export async function respondToFeedback(req: Request, res: Response) {
     if (!f) {
       return fail(res, 'Feedback not found', 404);
     }
+    if (f.status === FeedbackStatus.acted_on) {
+      return fail(res, 'This feedback is resolved and cannot be updated', 400);
+    }
 
     const updated = await prisma.feedback.update({
       where: { id: f.id },
