@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabBar } from '../components/navigation/MainTabBar';
 import { AlertsScreen } from '../screens/main/AlertsScreen';
@@ -16,6 +17,9 @@ export function StudentMainTabs() {
       tabBar={props => <MainTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        ...(Platform.OS === 'android'
+          ? { tabBarStyle: { overflow: 'visible' as const } }
+          : {}),
       }}>
       <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="MyFeedback" component={MyFeedbackStackNavigator} />

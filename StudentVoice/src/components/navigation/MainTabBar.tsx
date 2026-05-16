@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Image,
   type ImageSourcePropType,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -84,7 +85,10 @@ export function MainTabBar({
             <View key={route.key} style={styles.fabSlot}>
               <Pressable
                 onPress={onPress}
-                style={styles.fabPress}
+                style={[
+                  styles.fabPress,
+                  Platform.OS === 'android' && styles.fabPressLift,
+                ]}
                 accessibilityRole="button"
                 accessibilityLabel="Submit feedback">
                 <Image
@@ -165,6 +169,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6,
+  },
+  fabPressLift: {
+    transform: [{ translateY: -2 }],
   },
   fabImg: {
     width: fabSize,
